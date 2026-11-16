@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.actemium.controlempt",
+        "sha256_cert_fingerprints": ["95:30:A9:A8:37:FD:B0:CE:C5:9B:33:CE:97:64:DF:0D:35:3F:71:AB:29:08:89:E6:47:96:50:20:30:C5:56:A3"]
+      }
+    }]

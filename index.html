@@ -385,6 +385,8 @@ mark{background:#fff1a8;color:inherit;border-radius:3px;padding:0 1px}
 .dhb{display:flex;flex-direction:column;gap:6px}.dhbr{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) 96px;gap:10px;align-items:center;font-size:12.5px}.dhbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#26324a;font-weight:600}.dhbt{height:12px;background:#eef2f7;border-radius:4px;overflow:hidden}.dhbf{height:100%;border-radius:0 4px 4px 0}.dhbv{font-weight:800;color:#0f1b2d;text-align:right;line-height:1.15}.dhbv small{display:block;font-weight:600;color:#6b7a90;font-size:11px}
 .dsmeter{display:flex;height:14px;border-radius:5px;overflow:hidden;gap:2px;background:#fff}.dsk{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
 .dsrl{display:flex;flex-direction:column;gap:6px}.dsrl div{border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer;font-size:12.5px;display:flex;flex-direction:column}.dsrl span{color:#6b7a90;font-size:12px}.dsrl small{color:#4a5872;margin-top:2px}
+tr.insp td{background:#fdecec!important;color:#9b1c1c}tr.insp td:first-child{box-shadow:inset 4px 0 0 #c42b2b}tr.insp:hover td{background:#fbdcdc!important}
+.inspal{background:#fdecec;border-color:#f3b4b4;color:#9b1c1c}
 .ctrn{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--c)}.ctrt{font-size:16px;font-weight:800;color:var(--navy)}.ctrg .tw{border-top:1px solid var(--line)}
 .ittot{font-size:14px;color:var(--muted)}.ittot b{font-size:18px;color:#0f8a5f;margin-left:6px}
 @media (max-width:860px){.itr{grid-template-columns:1fr 1fr;position:relative;padding-top:36px}.itr .itn{position:absolute;top:8px;left:10px}.itr .it-d{grid-column:1/-1}.itr .it-x{position:absolute;top:6px;right:8px}.itr.gd{grid-template-columns:1fr 1fr}.itr.gd .it-d{grid-column:1/-1}.itr.emb{grid-template-columns:1fr 1fr}.itr.emb .emo{grid-column:1/-1}.itr.emb .emr2{grid-column:auto}}
@@ -503,7 +505,7 @@ const MOD={
  mpt:{nome:'OPs em MPT',ctrl:'Monitoramento MPT',sing:'OP em MPT',pre:'MPT',file:'MPT',pdfT:'RELATÓRIO DE MATERIAL MPT',ic:'mpt',ent:1,
   fields:[{k:'data',l:'Data',t:'date',req:1},{k:'stMpt',l:'Status do cadastro',t:'stmpt'},{k:'op',l:'OP'},{k:'grd',l:'GRD',req:1},{k:'pedido',l:'Nº do pedido'},{k:'ss',l:'SS'},{k:'nfVenda',l:'NF de venda'},{k:'nfBr',l:'NF BR',req:1},{k:'valorNfBr',l:'Valor total da NF BR (R$)',t:'money'},{k:'contrato',l:'Contrato',t:'contr'},{k:'plataforma',l:'Plataforma de origem',t:'plat'},{k:'obs',l:'Observações',t:'area'}]},
  rec:{nome:'Recebimento de materiais BR',ctrl:'Monitoramento MPT',sing:'Recebimento de materiais BR',pre:'REC',file:'Recebimento_BR',pdfT:'RELATÓRIO DE RECEBIMENTO DE MATERIAIS BR',ic:'rec',ent:1,
-  fields:[{k:'data',l:'Data',t:'date',req:1},{k:'contrato',l:'Contrato',t:'contr'},{k:'nfBr',l:'NF BR',req:1},{k:'rt',l:'RT'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'rg',l:'RG'},{k:'local',l:'Local de armazenamento',t:'local'},{k:'itens',l:'Itens da NF',t:'itens'},{k:'valorNfBr',l:'Valor total da NF BR (R$)',t:'total'},{k:'obs',l:'Observações',t:'area'}]},
+  fields:[{k:'data',l:'Data',t:'date',req:1},{k:'contrato',l:'Contrato',t:'contr'},{k:'nfBr',l:'NF BR',req:1},{k:'rt',l:'RT'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'rg',l:'RG'},{k:'local',l:'Local de armazenamento',t:'local'},{k:'stInsp',l:'Status da inspeção',t:'stinsp',def:'AGUARDANDO INSPEÇÃO'},{k:'itens',l:'Itens da NF',t:'itens'},{k:'valorNfBr',l:'Valor total da NF BR (R$)',t:'total'},{k:'obs',l:'Observações',t:'area'}]},
  fab:{nome:'Recebimento de Fabricados',ctrl:'Monitoramento MPT',sing:'Recebimento de Fabricados',pre:'FAB',file:'Recebimento_Fabricados',pdfT:'RELATÓRIO DE RECEBIMENTO DE FABRICADOS',ic:'fab',ent:1,
   fields:[{k:'data',l:'Data',t:'date',req:1},{k:'grd',l:'GRD'},{k:'nfBr',l:'NF BR',req:1},{k:'qtdTags',l:'Quantidade de TAGs',t:'num'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'valorNfBr',l:'Valor total da NF BR (R$)',t:'money'},{k:'origemFab',l:'Origem do material',t:'sel',opts:FAB_ORIG,outro:'origemOutro',req:1},{k:'origemOutro',l:'Origem (se "Outros")',t:'outro'},{k:'rtFwo',l:'RT/FWO (desembarque)'},{k:'obs',l:'Observações',t:'area'}]},
  rcs:{nome:'Recusas',ctrl:'Monitoramento MPT',sing:'Recusa de material',pre:'RCS',file:'Recusa',pdfT:'RELATÓRIO DE RECUSA DE MATERIAL',ic:'rcs',
@@ -590,6 +592,7 @@ function stInfo(r){
 }
 const chip=(t,c)=>`<span class="chip" style="background:${c}1a;color:${c}">${esc(t)}</span>`;
 const ST_GDV=[{k:'AGUARDANDO COLETA',t:'Aguardando coleta',c:'#c27a00'},{k:'COLETADO',t:'Coletado',c:'#0f8a5f'}];
+const inspPend=r=>r&&r.m==='rec'&&r.stInsp==='AGUARDANDO INSPEÇÃO';
 const stGdv=k=>ST_GDV.find(s=>s.k===k)||ST_GDV[0];
 const stChip=r=>{const s=stInfo(r);return chip(s.t,s.c)};
 const contratos=()=>uniq([...S.ctrs.map(c=>c.contrato),...S.regs.map(r=>r.contrato),...String(cfg().contratos||'').split(/[,;\n]/).map(s=>s.trim())]);
@@ -598,7 +601,7 @@ const destinos=()=>uniq([...DEV_DEST.filter(d=>d!=='OUTROS'),...regsOf('dev').ma
 const ST_MPT=[{k:'PENDENTE',t:'Pendente',c:'#d97706'},{k:'CONCLUIDO',t:'Concluído',c:'#0f8a5f'}];
 const stMpt=r=>ST_MPT.find(s=>s.k===(r.stMpt||'CONCLUIDO'))||ST_MPT[1];
 function fieldVal(r,fd){const v=r[fd.k];if(fd.t==='stmpt')return stMpt(r).t;if(fd.t==='date')return fmtD(v);if(fd.t==='stop')return stOp(v).t;if(fd.t==='num'||fd.t==='dec')return v===''||v==null?'':fmtN(v);
- if(fd.t==='money')return brl(v);if(fd.t==='total')return brl(r.m==='rec'?valorEnt(r):v);if(fd.t==='embl')return embLinhas(r).map(l=>[l.op&&'OP '+l.op,((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)&&'NF BR '+((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr),l.nfDev&&'NF dev. '+l.nfDev].filter(Boolean).join(' / ')).filter(Boolean).join('; ');if(fd.t==='stgdv')return stGdv(v).t;if(fd.t==='ptotal')return v===''||v==null?'':fmtN(v)+' kg';
+ if(fd.t==='money')return brl(v);if(fd.t==='total')return brl(r.m==='rec'?valorEnt(r):v);if(fd.t==='embl')return embLinhas(r).map(l=>[l.op&&'OP '+l.op,((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)&&'NF BR '+((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr),l.nfDev&&'NF dev. '+l.nfDev].filter(Boolean).join(' / ')).filter(Boolean).join('; ');if(fd.t==='stinsp')return v==='AGUARDANDO INSPEÇÃO'?'Aguardando inspeção':'Inspecionado';if(fd.t==='stgdv')return stGdv(v).t;if(fd.t==='ptotal')return v===''||v==null?'':fmtN(v)+' kg';
  if(fd.t==='sel')return selTxt(r,fd.k,fd.outro);if(fd.t==='itens')return (r.itens||[]).length?plural((r.itens||[]).length,'item','itens'):'';
  if(fd.t==='origem'){const o=v&&getReg(v);if(!o)return '';const it=r.item&&(o.itens||[]).find(i=>i.id===r.item);return `${o.cod} · NF BR ${o.nfBr||'-'}${it?' · '+it.desc:''}`}
  return v==null?'':String(v)}
@@ -818,6 +821,7 @@ function vDash(){
     <select class="in" data-chg="dashPl"><option value="">Todas as plataformas</option>${plataformas().map(p=>`<option ${p===F.pl?'selected':''}>${esc(p)}</option>`).join('')}</select>
     <select class="in" data-chg="dashDest"><option value="">Todos os destinos (devolução)</option>${destinos().map(p=>`<option ${p===F.dest?'selected':''}>${esc(p)}</option>`).join('')}</select>
     ${(F.ct||F.pl||F.dest)?`<button class="btn sm" data-act="dashClr">Limpar filtros</button>`:''}</div></div>
+  ${(()=>{const ip=S.regs.filter(inspPend);return ip.length?`<div class="grdal inspal" style="cursor:pointer" data-act="inspVer">${ic('alert',18)}<div><b>${plural(ip.length,'recebimento','recebimentos')} aguardando inspeção</b> — ${ip.slice(0,8).map(r=>'NF BR '+esc(r.nfBr||r.cod)+(r.data?' ('+fmtD(r.data)+')':'')).join(', ')}${ip.length>8?'…':''}. Toque para ver.</div></div>`:''})()}
   ${(()=>{const al=grdGroups().filter(g=>g.alerta);return al.length?`<div class="grdal" style="cursor:pointer" data-act="go" data-v="op">${ic('alert',18)}<div><b>Atenção: ${plural(al.length,'GRD','GRDs')} em verificação há mais de ${GRD_ALERTA_DIAS} dias</b> — ${al.reduce((s,g)=>s+g.pend.length,0)} OP(s) precisam ser tratadas (${al.slice(0,6).map(g=>'GRD '+esc(g.grd)+' há '+plural(g.dias,'dia','dias')).join(', ')}${al.length>6?'…':''}).</div></div>`:''})()}
   ${saldoCard()}
   ${dashTasks()}
@@ -877,6 +881,7 @@ function lf(m){return S.lf[m]||(S.lf[m]={q:'',ct:'',pl:'',st:'',ds:''})}
 function stOpts(m){
  if(m==='op')return [...ST_OP.map(s=>[s.k,s.t]),['PEND','Pendências (não encontrado, pintura, sem TAG/RFID)']];
  if(m==='mpt')return [['PENDENTE','Cadastro pendente'],['CONCLUIDO_C','Cadastro concluído'],['EM ESTOQUE','Em estoque'],['PARCIAL','Baixa parcial'],['BAIXADO','Baixado']];
+ if(m==='rec')return [['AGUARD','Aguardando inspeção'],['INSP','Inspecionado'],['EM ESTOQUE','Em estoque'],['PARCIAL','Baixa parcial'],['BAIXADO','Baixado']];
  if(ENTR.includes(m))return [['EM ESTOQUE','Em estoque'],['PARCIAL','Baixa parcial'],['BAIXADO','Baixado']];
  if(m==='gdv')return ST_GDV.map(s=>[s.k,s.t]);
  if(m==='dev')return DEV_DEST.map(d=>[d,d==='OUTROS'?'Outros':d]);
@@ -891,6 +896,7 @@ function filtered(m){
   if(f.ct&&(r.contrato||(o&&o.contrato))!==f.ct)return false;
   if(f.pl&&(r.plataforma||(o&&o.plataforma))!==f.pl)return false;
   if(f.st==='PENDENTE'||f.st==='CONCLUIDO_C'){if(stMpt(r).k!==(f.st==='PENDENTE'?'PENDENTE':'CONCLUIDO'))return false}
+  else if(f.st==='AGUARD'||f.st==='INSP'){if(inspPend(r)!==(f.st==='AGUARD'))return false}
   else if(f.st){const k=stInfo(r).k;if(f.st==='PEND'?!PEND.includes(k):k!==f.st)return false}
   if(q){const hay=[r.cod,...MOD[m].fields.map(fd=>fieldVal(r,fd)),stInfo(r).t,...(r.itens||[]).flatMap(i=>[i.desc,i.nm,i.nfBr,i.nfDev,i.rt,i.reserva]),...embLinhas(r).flatMap(l=>[l.op,l.nfBr,l.nfDev]),...r.anexos.map(a=>a.nome)].join(' ').toLowerCase();if(!hay.includes(q))return false}
   return true}).sort((a,b)=>(b.data||'').localeCompare(a.data||'')||(b.criadoEm||0)-(a.criadoEm||0));
@@ -899,7 +905,7 @@ const vcol=(l,fn)=>[l,r=>{const v=fn(r);return v===''||v==null||isNaN(v)?'—':b
 const COLS={
  op:[['OP / GRD',r=>`${esc(r.op||'—')}<small>${esc(r.cod)}${r.grd?' · GRD '+esc(r.grd):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—')],['Plataforma',r=>esc(r.plataforma||'—')],['SS',r=>esc(r.ss||'—'),'hm'],['Nº pedido',r=>esc(r.pedido||'—'),'hm'],['Status',r=>stChip(r)]],
  mpt:[['GRD / OP',r=>`GRD ${esc(r.grd||'—')}<small>${esc(r.cod)}${r.op?' · OP '+esc(r.op):''}</small>`,'desc'],['Cadastro',r=>chip(stMpt(r).t,stMpt(r).c)],['Data',r=>fmtD(r.data),'mono'],['Nº pedido',r=>esc(r.pedido||'—'),'hm'],['NF venda',r=>esc(r.nfVenda||'—'),'hm'],['NF BR',r=>esc(r.nfBr||'—')],vcol('Valor NF BR',r=>valorEnt(r)),['Plataforma',r=>esc(r.plataforma||'—'),'hm'],['Situação',r=>stChip(r)]],
- rec:[['NF BR / Itens',r=>`NF ${esc(r.nfBr||'—')}<small>${esc(r.cod)} · ${(r.itens||[]).length?esc(plural(r.itens.length,'item','itens')+': '+r.itens.map(i=>i.desc).join(', ').slice(0,70)):'sem itens'}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—'),'hm'],['RT',r=>esc(r.rt||'—'),'hm'],['Plataforma',r=>esc(r.plataforma||'—')],vcol('Valor NF BR',r=>valorEnt(r)),['Local',r=>esc(r.local||'—'),'hm'],['Situação',r=>stChip(r)]],
+ rec:[['NF BR / Itens',r=>`NF ${esc(r.nfBr||'—')}<small>${esc(r.cod)} · ${(r.itens||[]).length?esc(plural(r.itens.length,'item','itens')+': '+r.itens.map(i=>i.desc).join(', ').slice(0,70)):'sem itens'}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—'),'hm'],['RT',r=>esc(r.rt||'—'),'hm'],['Plataforma',r=>esc(r.plataforma||'—')],vcol('Valor NF BR',r=>valorEnt(r)),['Local',r=>esc(r.local||'—'),'hm'],['Situação',r=>(inspPend(r)?chip('Aguardando inspeção','#c42b2b')+' ':'')+stChip(r)]],
  fab:[['GRD / NF BR',r=>`GRD ${esc(r.grd||'—')}<small>${esc(r.cod)} · NF BR ${esc(r.nfBr||'—')}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['TAGs',r=>r.qtdTags===''||r.qtdTags==null?'—':fmtN(r.qtdTags),'mono'],['SS',r=>esc(r.ss||'—'),'hm'],['Plataforma',r=>esc(r.plataforma||'—')],['Origem',r=>esc(selTxt(r,'origemFab','origemOutro')||'—')],vcol('Valor NF BR',r=>valorEnt(r)),['Situação',r=>stChip(r)]],
  rcs:[['NF / Motivo',r=>`NF ${esc(r.nf||'—')}<small>${esc(r.cod)} · ${esc(String(r.motivo||'').slice(0,60))}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['RT',r=>esc(r.rt||'—')],['Contrato',r=>esc(r.contrato||'—'),'hm'],['Plataforma',r=>esc(r.plataforma||'—')],['Fotos',r=>String(r.fotos.length),'mono hm'],['Situação',r=>stChip(r)]],
  dev:[['NF devolução / NF BR',r=>`NF dev. ${esc(r.nfDev||'—')}<small>${esc(r.cod)} · NF BR ${esc(r.nfBr||'—')}${r.nm?' · NM '+esc(r.nm):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Qtd.',r=>r.qtd===''||r.qtd==null?'—':fmtN(r.qtd),'mono'],vcol('Valor NF dev.',r=>valorSai(r)),['RT/FWO',r=>esc(r.rtFwo||'—'),'hm'],['GRD transf.',r=>esc(r.grdTransf||'—'),'hm'],['Destino',r=>stChip(r)]],
@@ -926,7 +932,7 @@ function listaHTML(m){
  const L=filtered(m);const C=COLS[m];
  if(!L.length)return `<div class="card empty"><b>${regsOf(m).length?'Nenhum registro encontrado':'Nenhum registro ainda'}</b>${regsOf(m).length?'Ajuste a busca ou os filtros.':'Toque em “Novo” para cadastrar.'}</div>`;
  return `<div class="muted" style="font-size:12.5px;margin:-4px 0 8px">${L.length} exibido(s)</div><div class="card tw"><table class="tbl rsp"><thead><tr>${C.map(c=>`<th>${c[0]}</th>`).join('')}<th></th></tr></thead><tbody>
- ${L.map(r=>`<tr class="click" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
+ ${L.map(r=>`<tr class="click${inspPend(r)?' insp':''}" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
  </tbody></table></div>`;
 }
 function renderList(m){const l=$('#lista');if(l)l.innerHTML=listaHTML(m)}
@@ -974,6 +980,7 @@ function openDetail(id){
  <div class="mf">
   ${isAdmin()?`<button class="btn d" data-act="delReg" data-id="${r.id}" style="margin-right:auto">${ic('trash',15)}Excluir</button>`:''}
   ${r.m==='rec'?`<button class="btn" data-act="labelPrint" data-id="${r.id}">${ic('eti',15)}Imprimir etiqueta</button><button class="btn" data-act="labelOne" data-id="${r.id}">${ic('down',15)}Etiqueta PDF</button>`:''}
+  ${r.m==='rec'?(inspPend(r)?`<button class="btn" data-act="inspSt" data-id="${r.id}" data-k="INSPECIONADO" style="color:#0f8a5f;border-color:#0f8a5f">${ic('check',15)}Marcar como inspecionado</button>`:`<button class="btn" data-act="inspSt" data-id="${r.id}" data-k="AGUARDANDO INSPEÇÃO">Voltar p/ aguardando inspeção</button>`):''}
   ${r.m==='gdv'?(stGdv(r.status).k==='COLETADO'?`<button class="btn" data-act="gdvSt" data-id="${r.id}" data-k="AGUARDANDO COLETA">Voltar p/ aguardando coleta</button>`:`<button class="btn" data-act="gdvSt" data-id="${r.id}" data-k="COLETADO" style="color:#0f8a5f;border-color:#0f8a5f">${ic('check',15)}Marcar como coletado</button>`):''}
   ${r.m==='gdv'?`<button class="btn g" data-act="gdvXls" data-id="${r.id}">${ic('xls',15)}GRD em Excel</button>`:''}
   <button class="btn" data-act="edit" data-id="${r.id}">${ic('edit',15)}Editar</button>
@@ -1073,6 +1080,7 @@ function fieldHTML(fd,v){
  if(fd.t==='ptotal')return `<div class="f">${lab}<input class="in" name="${fd.k}" value="${v===''||v==null?'':esc(fmtN(v)+' kg')}" readonly tabindex="-1" style="background:#eef2fb;font-weight:800;color:#14306b"></div>`;
  if(fd.t==='total')return `<div class="f">${lab}<input class="in" name="${fd.k}" value="${esc(brl(v))}" readonly tabindex="-1" style="background:#eef6f1;font-weight:800;color:#0f8a5f"></div>`;
  if(fd.t==='local')return `<div class="f">${lab}<select class="in" name="${fd.k}" ${fd.req?'required':''}><option value="">Selecione…</option>${[...LOCAIS,...(v&&!LOCAIS.includes(v)?[v]:[])].map(o=>`<option ${v===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+ if(fd.t==='stinsp')return `<div class="f">${lab}<select class="in" name="${fd.k}"><option value="AGUARDANDO INSPEÇÃO" ${v==='AGUARDANDO INSPEÇÃO'?'selected':''}>Aguardando inspeção</option><option value="INSPECIONADO" ${v!=='AGUARDANDO INSPEÇÃO'?'selected':''}>Inspecionado</option></select></div>`;
  if(fd.t==='stgdv')return `<div class="f">${lab}<select class="in" name="${fd.k}">${ST_GDV.map(s=>`<option value="${s.k}" ${stGdv(v).k===s.k?'selected':''}>${s.t}</option>`).join('')}</select></div>`;
  if(fd.t==='stenv')return `<div class="f">${lab}<select class="in" name="${fd.k}">${ST_ENV.map(s=>`<option ${v===s.k?'selected':''}>${s.k}</option>`).join('')}</select></div>`;
  const type=fd.t==='date'?'date':'text';const list=fd.t==='plat'?'dlPlat':fd.t==='contr'?'dlContr':'';
@@ -1253,6 +1261,8 @@ async function setStatus(id,k){
 }
 async function setStGdv(id,k){const r=getReg(id);if(!r)return;const a=stGdv(r.status);if(a.k===k)return;
  try{await retry(()=>S.db.doc('registros/'+id).update({status:k,hist:[...r.hist,H(`Status: ${a.t} → ${stGdv(k).t}`)].slice(-60),atualizadoPor:S.user.nome,atualizadoEm:Date.now()}));toast('Status atualizado: '+stGdv(k).t)}catch(e){wErr(e)}}
+async function setInsp(id,k){const r=getReg(id);if(!r)return;const de=inspPend(r)?'Aguardando inspeção':'Inspecionado',para=k==='AGUARDANDO INSPEÇÃO'?'Aguardando inspeção':'Inspecionado';if(de===para)return;
+ try{await retry(()=>S.db.doc('registros/'+id).update({stInsp:k,hist:[...(r.hist||[]),H(`Inspeção: ${de} → ${para}`)].slice(-60),atualizadoPor:S.user.nome,atualizadoEm:Date.now()}));toast('Status atualizado: '+para)}catch(e){wErr(e)}}
 async function toMpt(id){
  const r=getReg(id);if(!r)return;
  if(!(await confirmBox(`Gerar o registro de MPT para a OP ${r.op} (GRD ${r.grd||'—'})? Os dados de OP, GRD, SS, contrato e plataforma serão copiados para o Monitoramento MPT – OPs em MPT (informe depois a NF de venda, a NF BR e o valor).`,'Gerar MPT')))return;
@@ -2634,6 +2644,8 @@ const ACT={...DSH_ACT,...DIA_ACT,...CTR_ACT,...INFO_ACT,...EVD_ACT,
  rmFoto:b=>{S.form.fotos.splice(+b.dataset.i,1);renderFotos()},rmAnexo:b=>{S.form.anexos.splice(+b.dataset.i,1);renderAnexos()},
  zoom:b=>zoomImg((S._zoom||[])[+b.dataset.i]),zoomForm:b=>zoomImg(S.form.fotos[+b.dataset.i].img),
  clearF:b=>{S.lf[b.dataset.m]={q:'',ct:'',pl:'',st:'',ds:'',gr:''};renderView()},
+ inspSt:async b=>{await setInsp(b.dataset.id,b.dataset.k);closeModal();openDetail(b.dataset.id)},
+ inspVer:()=>{lf('rec').st='AGUARD';go('rec')},
  gdvSt:async b=>{await setStGdv(b.dataset.id,b.dataset.k);closeModal();openDetail(b.dataset.id)},
  gdvXls:b=>gerarGrdExcel(b.dataset.id).catch(e=>toast('Erro no Excel: '+(e.message||e),'err')),
  xlsMod:b=>{const m=b.dataset.m;const f=lf(m);gerarExcel({[m]:filtered(m)},`Filtros: contrato ${f.ct||'todos'} · plataforma ${f.pl||'todas'}${f.st?' · status '+f.st:''}${f.q?' · busca "'+f.q+'"':''}`,`${MOD[m].file}_${today()}.xlsx`).catch(e=>toast('Erro no Excel: '+(e.message||e),'err'))},

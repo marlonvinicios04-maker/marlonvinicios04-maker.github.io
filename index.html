@@ -521,7 +521,7 @@ const MOD={
  emb:{nome:'Embarque',ctrl:'Baixas de estoque',sing:'Embarque',pre:'EMB',file:'Embarque',pdfT:'RELATÓRIO DE EMBARQUE',ic:'ship',sai:1,
   fields:[{k:'data',l:'Data',t:'date',req:1},{k:'rtFwo',l:'RT/FWO'},{k:'romaneio',l:'Romaneio'},{k:'embalagem',l:'Embalagem',t:'sel',opts:EMBALAGENS,req:1},{k:'numEmb',l:'Número da embalagem'},{k:'matPetro',l:'Material Petrobras?',t:'sel',opts:['NÃO','SIM'],def:'NÃO',req:1},{k:'linhas',l:'OPs / NF BR do embarque',t:'embl'},{k:'obs',l:'Observações',t:'area'}]},
  env:{nome:'Requisição de envio - Fábrica',ctrl:'Baixas de estoque',sing:'Requisição de envio - Fábrica',pre:'REQ',file:'Requisicao_Envio_Fabrica',pdfT:'REQUISIÇÃO DE ENVIO DE MATERIAL - FÁBRICA',ic:'env',sai:1,
-  fields:[{k:'titulo',l:'Título',t:'wide',def:ENV_TIT},{k:'solicitante',l:'Solicitante',t:'wide'},{k:'data',l:'Data',t:'date',req:1},{k:'origem',l:'NF BR do recebimento (Recebimento de materiais BR)',t:'origem',src:['rec'],item:1},{k:'nfBr',l:'NF BR / CLM',req:1},{k:'nm',l:'NM'},{k:'qtdEnvio',l:'Quantidade enviada',t:'dec'},{k:'valor',l:'Valor baixado do estoque (R$)',t:'money'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'stEnvio',l:'Status do envio',t:'stenv',req:1},{k:'obs',l:'Observações',t:'area'}]},
+  fields:[{k:'titulo',l:'Título',t:'wide',def:ENV_TIT},{k:'solicitante',l:'Solicitante',t:'wide'},{k:'data',l:'Data',t:'date',req:1},{k:'origem',l:'NF BR do recebimento (Recebimento de materiais BR)',t:'origem',src:['rec'],item:1},{k:'nfBr',l:'NF BR / CLM',req:1},{k:'nm',l:'NM'},{k:'qtdEnvio',l:'Quantidade enviada',t:'dec'},{k:'valor',l:'Valor baixado do estoque (R$)',t:'money'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'stEnvio',l:'Status do envio',t:'stenv',req:1},{k:'stApl',l:'Status de aplicação',t:'stapl',def:'AGUARDANDO APLICAÇÃO'},{k:'obs',l:'Observações',t:'area'}]},
  gdv:{nome:'GRD de devolução',ctrl:'Devolução à Petrobras',sing:'GRD de devolução',pre:'GDV',file:'GRD_Devolucao',pdfT:'GRD DE DEVOLUÇÃO DE MATERIAL',ic:'gdv',
   fields:[{k:'grd',l:'Nº da GRD de devolução',req:1},{k:'data',l:'Data',t:'date',req:1},{k:'area',l:'Área',def:'PETROBRAS'},{k:'contrato',l:'Contrato',t:'contr',req:1},{k:'setor',l:'Setor',def:'MPT'},{k:'motivo',l:'Motivo',t:'sel',opts:['TRANSFERÊNCIA','DEVOLUÇÃO']},{k:'destino',l:'Destino',t:'sel',opts:GDV_DEST,outro:'destOutro'},{k:'destOutro',l:'Destino (se "Outros")',t:'outro'},{k:'status',l:'Status',t:'stgdv'},{k:'itens',l:'Itens da GRD',t:'itens'},{k:'valorTotal',l:'Valor total (R$)',t:'total'},{k:'pesoTotal',l:'Peso total (kg)',t:'ptotal'},{k:'obs',l:'Observações',t:'area'}]}
 };
@@ -599,6 +599,7 @@ function stInfo(r){
 const chip=(t,c)=>`<span class="chip" style="background:${c}1a;color:${c}">${esc(t)}</span>`;
 const ST_GDV=[{k:'AGUARDANDO COLETA',t:'Aguardando coleta',c:'#c27a00'},{k:'COLETADO',t:'Coletado',c:'#0f8a5f'}];
 const inspPend=r=>r&&r.m==='rec'&&r.stInsp==='AGUARDANDO INSPEÇÃO';
+const aplPend=r=>r&&r.m==='env'&&r.stApl==='AGUARDANDO APLICAÇÃO',aplOk=r=>r&&r.m==='env'&&r.stApl==='MATERIAL APLICADO';
 const stGdv=k=>ST_GDV.find(s=>s.k===k)||ST_GDV[0];
 const stChip=r=>{const s=stInfo(r);return chip(s.t,s.c)};
 const contratos=()=>uniq([...S.ctrs.map(c=>c.contrato),...S.regs.map(r=>r.contrato),...String(cfg().contratos||'').split(/[,;\n]/).map(s=>s.trim())]);
@@ -607,7 +608,7 @@ const destinos=()=>uniq([...DEV_DEST.filter(d=>d!=='OUTROS'),...regsOf('dev').ma
 const ST_MPT=[{k:'PENDENTE',t:'Pendente',c:'#d97706'},{k:'CONCLUIDO',t:'Concluído',c:'#0f8a5f'}];
 const stMpt=r=>ST_MPT.find(s=>s.k===(r.stMpt||'CONCLUIDO'))||ST_MPT[1];
 function fieldVal(r,fd){const v=r[fd.k];if(fd.t==='stmpt')return stMpt(r).t;if(fd.t==='date')return fmtD(v);if(fd.t==='stop')return stOp(v).t;if(fd.t==='num'||fd.t==='dec')return v===''||v==null?'':fmtN(v);
- if(fd.t==='money')return brl(v);if(fd.t==='total')return brl(r.m==='rec'?valorEnt(r):v);if(fd.t==='embl')return embLinhas(r).map(l=>[l.op&&'OP '+l.op,((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)&&'NF BR '+((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr),l.nfDev&&'NF dev. '+l.nfDev].filter(Boolean).join(' / ')).filter(Boolean).join('; ');if(fd.t==='stinsp')return v==='AGUARDANDO INSPEÇÃO'?'Aguardando inspeção':'Inspecionado';if(fd.t==='stgdv')return stGdv(v).t;if(fd.t==='ptotal')return v===''||v==null?'':fmtN(v)+' kg';
+ if(fd.t==='stapl')return v==='MATERIAL APLICADO'?'Material aplicado':v==='AGUARDANDO APLICAÇÃO'?'Aguardando aplicação':'';if(fd.t==='money')return brl(v);if(fd.t==='total')return brl(r.m==='rec'?valorEnt(r):v);if(fd.t==='embl')return embLinhas(r).map(l=>[l.op&&'OP '+l.op,((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)&&'NF BR '+((l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr),l.nfDev&&'NF dev. '+l.nfDev].filter(Boolean).join(' / ')).filter(Boolean).join('; ');if(fd.t==='stinsp')return v==='AGUARDANDO INSPEÇÃO'?'Aguardando inspeção':'Inspecionado';if(fd.t==='stgdv')return stGdv(v).t;if(fd.t==='ptotal')return v===''||v==null?'':fmtN(v)+' kg';
  if(fd.t==='sel')return selTxt(r,fd.k,fd.outro);if(fd.t==='itens')return (r.itens||[]).length?plural((r.itens||[]).length,'item','itens'):'';
  if(fd.t==='origem'){const o=v&&getReg(v);if(!o)return '';const it=r.item&&(o.itens||[]).find(i=>i.id===r.item);return `${o.cod} · NF BR ${o.nfBr||'-'}${it?' · '+it.desc:''}`}
  return v==null?'':String(v)}
@@ -828,6 +829,7 @@ function vDash(){
     <select class="in" data-chg="dashPl"><option value="">Todas as plataformas</option>${plataformas().map(p=>`<option ${p===F.pl?'selected':''}>${esc(p)}</option>`).join('')}</select>
     <select class="in" data-chg="dashDest"><option value="">Todos os destinos (devolução)</option>${destinos().map(p=>`<option ${p===F.dest?'selected':''}>${esc(p)}</option>`).join('')}</select>
     ${(F.ct||F.pl||F.dest)?`<button class="btn sm" data-act="dashClr">Limpar filtros</button>`:''}</div></div>
+  ${(()=>{const ap=S.regs.filter(aplPend);return ap.length?`<div class="grdal inspal" style="cursor:pointer" data-act="aplVer">${ic('alert',18)}<div><b>${ap.length===1?'1 NF aguardando aplicação — precisa ser quitada':ap.length+' NFs aguardando aplicação — precisam ser quitadas'}</b>: ${ap.slice(0,8).map(r=>'NF BR '+esc(r.nfBr||r.cod)+(r.data?' ('+fmtD(r.data)+')':'')).join(', ')}${ap.length>8?'…':''}. Toque para ver.</div></div>`:''})()}
   ${(()=>{const ip=S.regs.filter(inspPend);return ip.length?`<div class="grdal inspal" style="cursor:pointer" data-act="inspVer">${ic('alert',18)}<div><b>${plural(ip.length,'recebimento','recebimentos')} aguardando inspeção</b> — ${ip.slice(0,8).map(r=>'NF BR '+esc(r.nfBr||r.cod)+(r.data?' ('+fmtD(r.data)+')':'')).join(', ')}${ip.length>8?'…':''}. Toque para ver.</div></div>`:''})()}
   ${(()=>{const al=grdGroups().filter(g=>g.alerta);return al.length?`<div class="grdal" style="cursor:pointer" data-act="go" data-v="op">${ic('alert',18)}<div><b>Atenção: ${plural(al.length,'GRD','GRDs')} em verificação há mais de ${GRD_ALERTA_DIAS} dias</b> — ${al.reduce((s,g)=>s+g.pend.length,0)} OP(s) precisam ser tratadas (${al.slice(0,6).map(g=>'GRD '+esc(g.grd)+' há '+plural(g.dias,'dia','dias')).join(', ')}${al.length>6?'…':''}).</div></div>`:''})()}
   ${saldoCard()}
@@ -893,7 +895,7 @@ function stOpts(m){
  if(m==='gdv')return ST_GDV.map(s=>[s.k,s.t]);
  if(m==='dev')return DEV_DEST.map(d=>[d,d==='OUTROS'?'Outros':d]);
  if(m==='emb')return EMBALAGENS.map(e=>[e,e]);
- if(m==='env')return ST_ENV.map(s=>[s.k,s.k]);return [];
+ if(m==='env')return [['APL_AG','Aguardando aplicação'],['APL_OK','Material aplicado'],...ST_ENV.map(s=>[s.k,s.k])];return [];
 }
 function filtered(m){
  const f=lf(m);const q=f.q.trim().toLowerCase();
@@ -904,6 +906,7 @@ function filtered(m){
   if(f.pl&&(r.plataforma||(o&&o.plataforma))!==f.pl)return false;
   if(f.st==='PENDENTE'||f.st==='CONCLUIDO_C'){if(stMpt(r).k!==(f.st==='PENDENTE'?'PENDENTE':'CONCLUIDO'))return false}
   else if(f.st==='AGUARD'||f.st==='INSP'){if(inspPend(r)!==(f.st==='AGUARD'))return false}
+  else if(f.st==='APL_AG'||f.st==='APL_OK'){if(!(f.st==='APL_AG'?aplPend(r):aplOk(r)))return false}
   else if(f.st){const k=stInfo(r).k;if(f.st==='PEND'?!PEND.includes(k):k!==f.st)return false}
   if(q){const hay=[r.cod,...MOD[m].fields.map(fd=>fieldVal(r,fd)),stInfo(r).t,...(r.itens||[]).flatMap(i=>[i.desc,i.nm,i.nfBr,i.nfDev,i.rt,i.reserva]),...embLinhas(r).flatMap(l=>[l.op,l.nfBr,l.nfDev]),...r.anexos.map(a=>a.nome)].join(' ').toLowerCase();if(!hay.includes(q))return false}
   return true}).sort((a,b)=>(b.data||'').localeCompare(a.data||'')||(b.criadoEm||0)-(a.criadoEm||0));
@@ -917,7 +920,7 @@ const COLS={
  rcs:[['NF / Motivo',r=>`NF ${esc(r.nf||'—')}<small>${esc(r.cod)} · ${esc(String(r.motivo||'').slice(0,60))}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['RT',r=>esc(r.rt||'—')],['Contrato',r=>esc(r.contrato||'—'),'hm'],['Plataforma',r=>esc(r.plataforma||'—')],['Fotos',r=>String(r.fotos.length),'mono hm'],['Situação',r=>stChip(r)]],
  dev:[['NF devolução / NF BR',r=>`NF dev. ${esc(r.nfDev||'—')}<small>${esc(r.cod)} · NF BR ${esc(r.nfBr||'—')}${r.nm?' · NM '+esc(r.nm):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Qtd.',r=>r.qtd===''||r.qtd==null?'—':fmtN(r.qtd),'mono'],vcol('Valor NF dev.',r=>valorSai(r)),['RT/FWO',r=>esc(r.rtFwo||'—'),'hm'],['GRD transf.',r=>esc(r.grdTransf||'—'),'hm'],['Destino',r=>stChip(r)]],
  emb:[['RT/FWO / Romaneio',r=>`${esc(r.rtFwo||'—')}<small>${esc(r.cod)}${r.romaneio?' · Romaneio '+esc(r.romaneio):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Embalagem',r=>stChip(r)],['OP',r=>esc(uniq(embLinhas(r).map(l=>l.op)).join(', ')||'—'),'hm'],['NF BR',r=>esc(uniq(embLinhas(r).map(l=>(l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)).join(', ')||'—')],['NF dev.',r=>esc(uniq(embLinhas(r).map(l=>l.nfDev)).join(', ')||'—')],vcol('Baixa no estoque',r=>valorSai(r))],
- env:[['Requisição',r=>`${esc(r.cod)}<small>${esc(r.titulo||ENV_TIT)}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['NF BR / CLM',r=>esc(r.nfBr||'—')],['Qtd.',r=>r.qtdEnvio===''||r.qtdEnvio==null?'—':fmtN(r.qtdEnvio),'mono'],vcol('Valor',r=>valorSai(r)),['Plataforma',r=>esc(r.plataforma||'—'),'hm'],['Status do envio',r=>stChip(r)]],
+ env:[['Requisição',r=>`${esc(r.cod)}<small>${esc(r.titulo||ENV_TIT)}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['NF BR / CLM',r=>esc(r.nfBr||'—')],['Qtd.',r=>r.qtdEnvio===''||r.qtdEnvio==null?'—':fmtN(r.qtdEnvio),'mono'],vcol('Valor',r=>valorSai(r)),['Plataforma',r=>esc(r.plataforma||'—'),'hm'],['Status do envio',r=>stChip(r)],['Aplicação',r=>aplPend(r)?chip('Aguardando aplicação','#c42b2b'):aplOk(r)?chip('Material aplicado','#0f8a5f'):'—']],
  gdv:[['GRD de devolução',r=>`GRD ${esc(r.grd||'—')}<small>${esc(r.cod)} · ${esc(plural((r.itens||[]).length,'item','itens'))}${(r.itens||[]).length?': '+esc(r.itens.map(i=>i.desc).join(', ').slice(0,60)):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—')],['Motivo / Destino',r=>esc([r.motivo,r.destino?selTxt(r,'destino','destOutro'):''].filter(Boolean).join(' → ')||'—'),'hm'],['NF BR',r=>esc(uniq((r.itens||[]).map(i=>i.nfBr).filter(Boolean)).join(', ')||'—'),'hm'],['Peso',r=>r.pesoTotal?fmtN(r.pesoTotal)+' kg':'—','mono hm'],vcol('Valor total',r=>+r.valorTotal||0),['Status',r=>stChip(r)]]
 };
 function vList(m){
@@ -939,7 +942,7 @@ function listaHTML(m){
  const L=filtered(m);const C=COLS[m];
  if(!L.length)return `<div class="card empty"><b>${regsOf(m).length?'Nenhum registro encontrado':'Nenhum registro ainda'}</b>${regsOf(m).length?'Ajuste a busca ou os filtros.':'Toque em “Novo” para cadastrar.'}</div>`;
  return `<div class="muted" style="font-size:12.5px;margin:-4px 0 8px">${L.length} exibido(s)</div><div class="card tw"><table class="tbl rsp"><thead><tr>${C.map(c=>`<th>${c[0]}</th>`).join('')}<th></th></tr></thead><tbody>
- ${L.map(r=>`<tr class="click${inspPend(r)?' insp':''}${r.m==='gdv'&&stGdv(r.status).k==='COLETADO'?' colet':''}" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
+ ${L.map(r=>`<tr class="click${inspPend(r)||aplPend(r)?' insp':''}${(r.m==='gdv'&&stGdv(r.status).k==='COLETADO')||aplOk(r)?' colet':''}" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
  </tbody></table></div>`;
 }
 function renderList(m){const l=$('#lista');if(l)l.innerHTML=listaHTML(m)}
@@ -988,6 +991,7 @@ function openDetail(id){
   ${isAdmin()?`<button class="btn d" data-act="delReg" data-id="${r.id}" style="margin-right:auto">${ic('trash',15)}Excluir</button>`:''}
   ${r.m==='rec'?`<button class="btn" data-act="labelPrint" data-id="${r.id}">${ic('eti',15)}Imprimir etiqueta</button><button class="btn" data-act="labelOne" data-id="${r.id}">${ic('down',15)}Etiqueta PDF</button>`:''}
   ${r.m==='rec'?(inspPend(r)?`<button class="btn" data-act="inspSt" data-id="${r.id}" data-k="INSPECIONADO" style="color:#0f8a5f;border-color:#0f8a5f">${ic('check',15)}Marcar como inspecionado</button>`:`<button class="btn" data-act="inspSt" data-id="${r.id}" data-k="AGUARDANDO INSPEÇÃO">Voltar p/ aguardando inspeção</button>`):''}
+  ${r.m==='env'?(aplPend(r)?`<button class="btn" data-act="aplSt" data-id="${r.id}" data-k="MATERIAL APLICADO" style="color:#0f8a5f;border-color:#0f8a5f">${ic('check',15)}Marcar material aplicado</button>`:`<button class="btn" data-act="aplSt" data-id="${r.id}" data-k="AGUARDANDO APLICAÇÃO">Voltar p/ aguardando aplicação</button>`):''}
   ${r.m==='gdv'?(stGdv(r.status).k==='COLETADO'?`<button class="btn" data-act="gdvSt" data-id="${r.id}" data-k="AGUARDANDO COLETA">Voltar p/ aguardando coleta</button>`:`<button class="btn" data-act="gdvSt" data-id="${r.id}" data-k="COLETADO" style="color:#0f8a5f;border-color:#0f8a5f">${ic('check',15)}Marcar como coletado</button>`):''}
   ${r.m==='gdv'?`<button class="btn g" data-act="gdvXls" data-id="${r.id}">${ic('xls',15)}GRD em Excel</button>`:''}
   <button class="btn" data-act="edit" data-id="${r.id}">${ic('edit',15)}Editar</button>
@@ -1092,6 +1096,7 @@ function fieldHTML(fd,v){
  if(fd.t==='ptotal')return `<div class="f">${lab}<input class="in" name="${fd.k}" value="${v===''||v==null?'':esc(fmtN(v)+' kg')}" readonly tabindex="-1" style="background:#eef2fb;font-weight:800;color:#14306b"></div>`;
  if(fd.t==='total')return `<div class="f">${lab}<input class="in" name="${fd.k}" value="${esc(brl(v))}" readonly tabindex="-1" style="background:#eef6f1;font-weight:800;color:#0f8a5f"></div>`;
  if(fd.t==='local')return `<div class="f">${lab}<select class="in" name="${fd.k}" ${fd.req?'required':''}><option value="">Selecione…</option>${[...LOCAIS,...(v&&!LOCAIS.includes(v)?[v]:[])].map(o=>`<option ${v===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+ if(fd.t==='stapl')return `<div class="f">${lab}<select class="in" name="${fd.k}"><option value="AGUARDANDO APLICAÇÃO" ${v!=='MATERIAL APLICADO'?'selected':''}>Aguardando aplicação</option><option value="MATERIAL APLICADO" ${v==='MATERIAL APLICADO'?'selected':''}>Material aplicado</option></select></div>`;
  if(fd.t==='stinsp')return `<div class="f">${lab}<select class="in" name="${fd.k}"><option value="AGUARDANDO INSPEÇÃO" ${v==='AGUARDANDO INSPEÇÃO'?'selected':''}>Aguardando inspeção</option><option value="INSPECIONADO" ${v!=='AGUARDANDO INSPEÇÃO'?'selected':''}>Inspecionado</option></select></div>`;
  if(fd.t==='stgdv')return `<div class="f">${lab}<select class="in" name="${fd.k}">${ST_GDV.map(s=>`<option value="${s.k}" ${stGdv(v).k===s.k?'selected':''}>${s.t}</option>`).join('')}</select></div>`;
  if(fd.t==='stenv')return `<div class="f">${lab}<select class="in" name="${fd.k}">${ST_ENV.map(s=>`<option ${v===s.k?'selected':''}>${s.k}</option>`).join('')}</select></div>`;
@@ -1328,6 +1333,9 @@ function devPuxa(f){const v=f.nfBr.value;if(!String(v).trim())return;if(f.origem
  const o=achaNfBr(v,['rec']);if(!o)return toast('NF BR '+v+' não encontrada em Recebimento de materiais BR. Sem ela vinculada, a devolução não baixa o estoque.','err');
  if(f.origem){if(![...f.origem.options].some(op=>op.value===o.id))return toast('A NF BR '+o.nfBr+' já está totalmente baixada.','err');f.origem.value=o.id;onOrigem(f)}
  toast(`NF BR ${o.nfBr} (${o.cod}) vinculada. Escolha o item, informe quantidade e valor da NF de devolução para baixar o saldo.`)}
+
+async function setApl(id,k){const r=getReg(id);if(!r)return;const nm=x=>x==='MATERIAL APLICADO'?'Material aplicado':'Aguardando aplicação',de=nm(r.stApl),para=nm(k);if(r.stApl===k)return;
+ try{await retry(()=>S.db.doc('registros/'+id).update({stApl:k,hist:[...(r.hist||[]),H(`Aplicação: ${de} → ${para}`)].slice(-60),atualizadoPor:S.user.nome,atualizadoEm:Date.now()}));toast('Status atualizado: '+para)}catch(e){wErr(e)}}
 
 /* ================= PDF – PADRÃO ACTEMIUM (pdf-lib) ================= */
 const PW=210,PH=297,MX=12,KMM=72/25.4;
@@ -2683,7 +2691,7 @@ const ACT={...DSH_ACT,...DIA_ACT,...CTR_ACT,...INFO_ACT,...EVD_ACT,
  zoom:b=>zoomImg((S._zoom||[])[+b.dataset.i]),zoomForm:b=>zoomImg(S.form.fotos[+b.dataset.i].img),
  clearF:b=>{S.lf[b.dataset.m]={q:'',ct:'',pl:'',st:'',ds:'',gr:''};renderView()},
  inspSt:async b=>{await setInsp(b.dataset.id,b.dataset.k);closeModal();openDetail(b.dataset.id)},
- inspVer:()=>{lf('rec').st='AGUARD';go('rec')},
+ inspVer:()=>{lf('rec').st='AGUARD';go('rec')},aplVer:()=>{lf('env').st='APL_AG';go('env')},aplSt:async b=>{await setApl(b.dataset.id,b.dataset.k);closeModal();openDetail(b.dataset.id)},
  gdvSt:async b=>{await setStGdv(b.dataset.id,b.dataset.k);closeModal();openDetail(b.dataset.id)},
  gdvXls:b=>gerarGrdExcel(b.dataset.id).catch(e=>toast('Erro no Excel: '+(e.message||e),'err')),
  xlsMod:b=>{const m=b.dataset.m;const f=lf(m);gerarExcel({[m]:filtered(m)},`Filtros: contrato ${f.ct||'todos'} · plataforma ${f.pl||'todas'}${f.st?' · status '+f.st:''}${f.q?' · busca "'+f.q+'"':''}`,`${MOD[m].file}_${today()}.xlsx`).catch(e=>toast('Erro no Excel: '+(e.message||e),'err'))},

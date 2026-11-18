@@ -1130,18 +1130,18 @@ function renderItens(){const b=$('#itensBox');if(!b||!S.form)return;const L=S.fo
 function updItemTotals(){const L=S.form.vals.itens||[];if(S.form.m==='gdv'){const v=L.reduce((s,it)=>s+(it.vtotal===''?0:num(it.vtotal)),0),p=L.reduce((s,it)=>s+(it.peso===''?0:num(it.peso)),0);const t=$('#itTot');if(t)t.textContent=brl(v)||'R$ 0,00';const tp=$('#itPeso');if(tp)tp.textContent=fmtN(Math.round(p*1000)/1000)+' kg';const f=$('#fReg');if(f&&f.valorTotal)f.valorTotal.value=brl(v)||'';if(f&&f.pesoTotal)f.pesoTotal.value=fmtN(Math.round(p*1000)/1000)+' kg';return}L.forEach((it,i)=>{const e=$('#itt'+i);if(e)e.value=brl(itemTot(it))||''});const tot=L.reduce((s,it)=>s+itemTot(it),0);const t=$('#itTot');if(t)t.textContent=brl(tot)||'R$ 0,00';const f=$('#fReg');if(f&&f.valorNfBr)f.valorNfBr.value=brl(tot)||''}
 function afterForm(){const f=$('#fReg');if(!f)return;const F=S.form;const M=MOD[F.m];
  const sync=()=>{Object.assign(F.vals,formVals(f))};
- f.addEventListener('input',e=>{if(S.form!==F||!f.isConnected)return;const t=e.target;if(t.dataset.el!=null){embSet(t);return}if(t.dataset.it!=null){F.vals.itens[+t.dataset.it][t.dataset.ik]=t.value;updItemTotals();return}sync();
+ f.addEventListener('input',e=>{if(S.form!==F||!f.isConnected)return;const t=e.target;if(t.dataset.el!=null){embSet(t);return}if(t.dataset.it!=null){F.vals.itens[+t.dataset.it][t.dataset.ik]=t.value;if(F.m==='gdv'&&t.dataset.ik==='nfBr')gdvPuxa(+t.dataset.it,f);else updItemTotals();return}sync();
   if(t.name==='qtd'||t.name==='qtdEnvio')calcBaixa(f,t.name)});
  f.addEventListener('change',e=>{if(S.form!==F||!f.isConnected)return;const t=e.target;if(t.dataset.el!=null){embSet(t,1);return}if(t.name==='matPetro'){sync();renderLinhasEmb();return}if(t.dataset.it!=null){F.vals.itens[+t.dataset.it][t.dataset.ik]=t.value;updItemTotals();return}sync();
   if(t.dataset.outro!==undefined&&t.dataset.outro){const box=f.querySelector(`[data-outro-of="${t.name}"]`);if(box)box.style.display=/^OUTR/.test(t.value)?'':'none'}
   if(t.name==='plataforma'&&f.contrato&&!f.contrato.value.trim()){const cs=ctrDoPlat(t.value);if(cs.length===1){f.contrato.value=cs[0];sync();toast('Contrato preenchido pela plataforma: '+cs[0])}}
-  if(t.name==='origem')onOrigem(f);if(t.name==='itemId')onItem(f)});
+  if(t.name==='origem')onOrigem(f);if(t.name==='itemId')onItem(f);if(t.name==='nfBr'&&F.m==='dev')devPuxa(f)});
  if(M.fields.some(fd=>fd.t==='itens')){renderItens();updItemTotals()}
  if(F.m==='emb')renderLinhasEmb();
  renderFotos();renderAnexos();
 }
 function curItem(f){const o=f.origem&&getReg(f.origem.value);const it=o&&o.itens&&f.itemId&&o.itens.find(i=>i.id===f.itemId.value);return {o,it}}
-function onOrigem(f){const o=getReg(f.origem.value);const set=(k,v)=>{if(f[k]&&v!==''&&v!=null)f[k].value=v};
+function onOrigem(f){const o=getReg(f.origem.value);if(o&&S.form.m==='dev'){if(o.itens&&o.itens.length===1)setTimeout(()=>{if(f.itemId){f.itemId.value=o.itens[0].id;onItem(f)}},0);puxaFotos(o)}const set=(k,v)=>{if(f[k]&&v!==''&&v!=null)f[k].value=v};
  if(f.itemId){f.itemId.innerHTML=itemOpts(o,'');S.form.vals.item=''}
  if(o){set('nfBr',o.nfBr);set('plataforma',o.plataforma);set('ss',o.ss);if(S.form.m==='emb')set('op',o.op)}
  Object.assign(S.form.vals,formVals(f))}
@@ -1290,6 +1290,32 @@ function embTotForm(){return (S.form.vals.linhas||[]).reduce((s,l)=>s+linhaBaixa
 function embSet(t,chg){const F=S.form;const i=+t.dataset.el,k=t.dataset.ek;const l=F.vals.linhas[i];if(!l)return;l[k]=t.value;
  if(k==='origem'){const o=getReg(t.value);if(o)l.nfBr=o.nfBr||'';renderLinhasEmb();return}
  const b2=linhaBaixa({origem:l.origem,nfDev:l.nfDev,valor:l.valor===''?0:num(l.valor)});const st=$('#embSt'+i);if(st)st.innerHTML=b2?chip('Baixa '+brl(b2),'#c2570c'):chip('Sem baixa no estoque','#64748b');const tt=$('#embTot');if(tt)tt.textContent=brl(embTotForm())||'R$ 0,00'}
+
+/* ===== puxar dados pela NF BR (GRD de devolução e Devolução) ===== */
+const nfKey=v=>String(v||'').toUpperCase().replace(/[^0-9A-Z]/g,'').replace(/^0+/,'');
+function achaNfBr(v,mods){const k=nfKey(v);if(!k)return null;const L=S.regs.filter(r=>mods.includes(r.m)&&nfKey(r.nfBr)===k);
+ return L.sort((a,b)=>['rec','fab','mpt'].indexOf(a.m)-['rec','fab','mpt'].indexOf(b.m)||(b.data||'').localeCompare(a.data||''))[0]||null}
+function puxaFotos(o){const F=S.form;if(!F||!o||!(o.fotos||[]).length)return 0;let n=0;
+ for(const pid of o.fotos){if(F.fotos.some(p=>p.src===pid||p.pid===pid))continue;if(F.fotos.length>=MAX_FOTOS)break;const p={img:fotoCache[pid]||null,src:pid};F.fotos.push(p);n++;
+  if(!p.img)getFoto(pid).then(v=>{if(v){p.img=v}else{const i=F.fotos.indexOf(p);if(i>=0)F.fotos.splice(i,1)}renderFotos()})}
+ renderFotos();return n}
+function gdvPuxa(i,f){const F=S.form;const L=F.vals.itens;const it=L[i];const o=achaNfBr(it.nfBr,['rec','fab','mpt']);
+ if(!String(it.nfBr||'').trim()){updItemTotals();return}
+ if(!o){toast('NF BR '+it.nfBr+' não encontrada nos recebimentos. Preencha manualmente.','err');updItemTotals();return}
+ const vazio=x=>x==null||String(x).trim()==='';const put=(t,k,v)=>{if(vazio(t[k])&&!vazio(v))t[k]=String(v)};
+ const rt=o.rt||o.rtFwo||'';
+ const linhas=(o.itens&&o.itens.length)?o.itens.map(x=>({nm:x.nm,un:x.un,qtd:x.qtd===''||x.qtd==null?'':nb(x.qtd),desc:x.desc,vtotal:nb(x.vtotal!=null&&x.vtotal!==''?x.vtotal:(+x.qtd||0)*(+x.vunit||0)),rt}))
+  :[{nm:o.nm||'',un:'UN',qtd:o.m==='fab'&&o.qtdTags?nb(o.qtdTags):'',desc:o.m==='fab'?('Fabricados'+(o.qtdTags?' – '+o.qtdTags+' TAG(s)':'')+(o.descricao?' – '+o.descricao:'')):(o.m==='mpt'?'OP '+(o.op||'')+(o.grd?' – GRD '+o.grd:''):(o.descricao||'')),vtotal:valorEnt(o)?nb(valorEnt(o)):'',rt}];
+ it.nfBr=o.nfBr||it.nfBr;const ini=linhas[0];['nm','qtd','desc','vtotal','rt'].forEach(k=>put(it,k,ini[k]));if(ini.un&&(it.un==='UN'||!it.un))it.un=ini.un;
+ const ja=new Set(L.map(x=>nfKey(x.nfBr)+'|'+String(x.desc||'').trim()));let add=0;
+ linhas.slice(1).forEach(l=>{if(ja.has(nfKey(o.nfBr)+'|'+String(l.desc||'').trim()))return;const n=novoItemG();Object.assign(n,{nfBr:o.nfBr,nm:l.nm||'',un:l.un||'UN',qtd:l.qtd||'',desc:l.desc||'',vtotal:l.vtotal||'',rt:l.rt||''});L.splice(i+1+add,0,n);add++});
+ const ff=$('#fReg');if(ff&&ff.contrato&&!ff.contrato.value.trim()&&o.contrato){ff.contrato.value=o.contrato;F.vals.contrato=o.contrato}
+ const nf=puxaFotos(o);renderItens();updItemTotals();
+ toast(`NF BR ${o.nfBr} (${o.cod}): ${plural(linhas.length,'item carregado','itens carregados')}${nf?` e ${plural(nf,'foto','fotos')}`:''}. Complete o que faltar.`)}
+function devPuxa(f){const v=f.nfBr.value;if(!String(v).trim())return;if(f.origem&&f.origem.value){const cur=getReg(f.origem.value);if(cur&&nfKey(cur.nfBr)===nfKey(v))return}
+ const o=achaNfBr(v,['rec']);if(!o)return toast('NF BR '+v+' não encontrada em Recebimento de materiais BR. Sem ela vinculada, a devolução não baixa o estoque.','err');
+ if(f.origem){if(![...f.origem.options].some(op=>op.value===o.id))return toast('A NF BR '+o.nfBr+' já está totalmente baixada.','err');f.origem.value=o.id;onOrigem(f)}
+ toast(`NF BR ${o.nfBr} (${o.cod}) vinculada. Escolha o item, informe quantidade e valor da NF de devolução para baixar o saldo.`)}
 
 /* ================= PDF – PADRÃO ACTEMIUM (pdf-lib) ================= */
 const PW=210,PH=297,MX=12,KMM=72/25.4;

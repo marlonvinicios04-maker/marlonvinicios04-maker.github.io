@@ -385,8 +385,13 @@ mark{background:#fff1a8;color:inherit;border-radius:3px;padding:0 1px}
 .dhb{display:flex;flex-direction:column;gap:6px}.dhbr{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) 96px;gap:10px;align-items:center;font-size:12.5px}.dhbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#26324a;font-weight:600}.dhbt{height:12px;background:#eef2f7;border-radius:4px;overflow:hidden}.dhbf{height:100%;border-radius:0 4px 4px 0}.dhbv{font-weight:800;color:#0f1b2d;text-align:right;line-height:1.15}.dhbv small{display:block;font-weight:600;color:#6b7a90;font-size:11px}
 .dsmeter{display:flex;height:14px;border-radius:5px;overflow:hidden;gap:2px;background:#fff}.dsk{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
 .dsrl{display:flex;flex-direction:column;gap:6px}.dsrl div{border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer;font-size:12.5px;display:flex;flex-direction:column}.dsrl span{color:#6b7a90;font-size:12px}.dsrl small{color:#4a5872;margin-top:2px}
+tr.colet td{background:#e7f6ee!important;color:#0b6b48}tr.colet td:first-child{box-shadow:inset 4px 0 0 #0f8a5f}tr.colet:hover td{background:#d6f0e2!important}
 tr.insp td{background:#fdecec!important;color:#9b1c1c}tr.insp td:first-child{box-shadow:inset 4px 0 0 #c42b2b}tr.insp:hover td{background:#fbdcdc!important}
 .inspal{background:#fdecec;border-color:#f3b4b4;color:#9b1c1c}
+.relg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 22px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);min-width:230px;position:relative;z-index:1}
+.relg .t{font:800 46px/1 'SF Mono',Consolas,'DejaVu Sans Mono',monospace;color:#fff;letter-spacing:2px;text-shadow:0 0 18px rgba(184,212,50,.35);font-variant-numeric:tabular-nums}.relg .t .s{font-size:24px;color:#b8d432;margin-left:4px}.relg .t .c{animation:relb 1s steps(1) infinite;color:#b8d432}@keyframes relb{50%{opacity:.25}}
+.relg .d{font-size:12px;font-weight:600;color:#c9d6f0;margin-top:6px;letter-spacing:.08em}
+@media (max-width:900px){.relg{order:-1;width:100%;flex-direction:row;gap:12px;padding:8px 14px;min-width:0}.relg .t{font-size:32px}.relg .t .s{font-size:18px}.relg .d{margin-top:0}}
 .ctrn{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--c)}.ctrt{font-size:16px;font-weight:800;color:var(--navy)}.ctrg .tw{border-top:1px solid var(--line)}
 .ittot{font-size:14px;color:var(--muted)}.ittot b{font-size:18px;color:#0f8a5f;margin-left:6px}
 @media (max-width:860px){.itr{grid-template-columns:1fr 1fr;position:relative;padding-top:36px}.itr .itn{position:absolute;top:8px;left:10px}.itr .it-d{grid-column:1/-1}.itr .it-x{position:absolute;top:6px;right:8px}.itr.gd{grid-template-columns:1fr 1fr}.itr.gd .it-d{grid-column:1/-1}.itr.emb{grid-template-columns:1fr 1fr}.itr.emb .emo{grid-column:1/-1}.itr.emb .emr2{grid-column:auto}}
@@ -499,6 +504,7 @@ const DEV_DEST=['ARM RIO','ARM PT','OCYAN','ESTRUTURAL','MOTA-ENGIL','GRAN IHC',
 const EMBALAGENS=['Contêiner 6M','Contêiner baby','Caixa metálica','Cesta'];
 const DEST_C={'ARM RIO':'#0b5cad','ARM PT':'#6941c6','OCYAN':'#0e7490','ESTRUTURAL':'#b7791f','MOTA-ENGIL':'#c2570c','GRAN IHC':'#db2777','OUTROS':'#64748b'};
 const EMB_C={'Contêiner 6M':'#14306b','Contêiner baby':'#0b5cad','Caixa metálica':'#6941c6','Cesta':'#0e7490'};
+const GDV_DEST=['ARM RIO','ARM PT','IMBETIBA','GRAN IHC','MOTA-ENGIL','ESTRUTURAL','OCYAN','OUTROS'];
 const MOD={
  op:{nome:'OPs em verificação',ctrl:'GRDs para MPT',sing:'OP em verificação',pre:'VER',file:'Verificacao_OP',pdfT:'RELATÓRIO DE VERIFICAÇÃO DE OP',ic:'op',
   fields:[{k:'data',l:'Data',t:'date',req:1},{k:'op',l:'OP',req:1},{k:'grd',l:'GRD'},{k:'pedido',l:'Nº do pedido'},{k:'contrato',l:'Contrato',t:'contr'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'status',l:'Status',t:'stop',req:1},{k:'obs',l:'Observações',t:'area'}]},
@@ -517,7 +523,7 @@ const MOD={
  env:{nome:'Requisição de envio - Fábrica',ctrl:'Baixas de estoque',sing:'Requisição de envio - Fábrica',pre:'REQ',file:'Requisicao_Envio_Fabrica',pdfT:'REQUISIÇÃO DE ENVIO DE MATERIAL - FÁBRICA',ic:'env',sai:1,
   fields:[{k:'titulo',l:'Título',t:'wide',def:ENV_TIT},{k:'solicitante',l:'Solicitante',t:'wide'},{k:'data',l:'Data',t:'date',req:1},{k:'origem',l:'NF BR do recebimento (Recebimento de materiais BR)',t:'origem',src:['rec'],item:1},{k:'nfBr',l:'NF BR / CLM',req:1},{k:'nm',l:'NM'},{k:'qtdEnvio',l:'Quantidade enviada',t:'dec'},{k:'valor',l:'Valor baixado do estoque (R$)',t:'money'},{k:'ss',l:'SS'},{k:'plataforma',l:'Plataforma',t:'plat'},{k:'stEnvio',l:'Status do envio',t:'stenv',req:1},{k:'obs',l:'Observações',t:'area'}]},
  gdv:{nome:'GRD de devolução',ctrl:'Devolução à Petrobras',sing:'GRD de devolução',pre:'GDV',file:'GRD_Devolucao',pdfT:'GRD DE DEVOLUÇÃO DE MATERIAL',ic:'gdv',
-  fields:[{k:'grd',l:'Nº da GRD de devolução',req:1},{k:'data',l:'Data',t:'date',req:1},{k:'area',l:'Área',def:'PETROBRAS'},{k:'contrato',l:'Contrato',t:'contr',req:1},{k:'setor',l:'Setor',def:'MPT'},{k:'status',l:'Status',t:'stgdv'},{k:'itens',l:'Itens da GRD',t:'itens'},{k:'valorTotal',l:'Valor total (R$)',t:'total'},{k:'pesoTotal',l:'Peso total (kg)',t:'ptotal'},{k:'obs',l:'Observações',t:'area'}]}
+  fields:[{k:'grd',l:'Nº da GRD de devolução',req:1},{k:'data',l:'Data',t:'date',req:1},{k:'area',l:'Área',def:'PETROBRAS'},{k:'contrato',l:'Contrato',t:'contr',req:1},{k:'setor',l:'Setor',def:'MPT'},{k:'motivo',l:'Motivo',t:'sel',opts:['TRANSFERÊNCIA','DEVOLUÇÃO']},{k:'destino',l:'Destino',t:'sel',opts:GDV_DEST,outro:'destOutro'},{k:'destOutro',l:'Destino (se "Outros")',t:'outro'},{k:'status',l:'Status',t:'stgdv'},{k:'itens',l:'Itens da GRD',t:'itens'},{k:'valorTotal',l:'Valor total (R$)',t:'total'},{k:'pesoTotal',l:'Peso total (kg)',t:'ptotal'},{k:'obs',l:'Observações',t:'area'}]}
 };
 const MODS=Object.keys(MOD);
 
@@ -813,6 +819,7 @@ function vDash(){
  const envC=ST_ENV.map(s=>[s,envs.filter(r=>(r.stEnvio||'FÁBRICA')===s.k).length]);
  const greens=['#0f8a5f','#1f9a6d','#33a97c','#4bb88c','#66c69d','#83d3af','#a0dfc1','#bde9d3'];
  return `<div class="hero"><div><div class="hero-d">${esc(hoje)}</div><h1>${saud}, ${esc(S.user.nome.split(' ')[0])}!</h1><p>Visão geral do controle de materiais MPT${F.ct?' — contrato <b>'+esc(F.ct)+'</b>':''}${F.pl?' — plataforma <b>'+esc(F.pl)+'</b>':''}${F.dest?' — destino <b>'+esc(F.dest)+'</b>':''}.</p></div>
+  <div class="relg" id="relg">${relogioHTML()}</div>
   <div class="hero-r"><button class="btn hb1" data-act="novo">${ic('plus',16)}Novo registro</button><button class="btn hb2" data-act="scanQR">${ic('qr',16)}Ler QR</button><button class="btn hb2" data-act="go" data-v="rel">${ic('rel',16)}Relatórios</button></div></div>
   <div class="dbar"><div class="pill-tabs">${periodos.map(([k,t])=>`<button class="${F.p===k?'on':''}" data-act="dashP" data-p="${k}">${t}</button>`).join('')}</div>
    ${F.p==='custom'?`<div class="row" style="gap:6px"><input type="date" class="in" style="width:auto;padding:7px 10px" value="${esc(F.de)}" data-chg="dashDe"><span class="muted">até</span><input type="date" class="in" style="width:auto;padding:7px 10px" value="${esc(F.ate)}" data-chg="dashAte"></div>`:''}
@@ -911,7 +918,7 @@ const COLS={
  dev:[['NF devolução / NF BR',r=>`NF dev. ${esc(r.nfDev||'—')}<small>${esc(r.cod)} · NF BR ${esc(r.nfBr||'—')}${r.nm?' · NM '+esc(r.nm):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Qtd.',r=>r.qtd===''||r.qtd==null?'—':fmtN(r.qtd),'mono'],vcol('Valor NF dev.',r=>valorSai(r)),['RT/FWO',r=>esc(r.rtFwo||'—'),'hm'],['GRD transf.',r=>esc(r.grdTransf||'—'),'hm'],['Destino',r=>stChip(r)]],
  emb:[['RT/FWO / Romaneio',r=>`${esc(r.rtFwo||'—')}<small>${esc(r.cod)}${r.romaneio?' · Romaneio '+esc(r.romaneio):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Embalagem',r=>stChip(r)],['OP',r=>esc(uniq(embLinhas(r).map(l=>l.op)).join(', ')||'—'),'hm'],['NF BR',r=>esc(uniq(embLinhas(r).map(l=>(l.origem&&getReg(l.origem)&&getReg(l.origem).nfBr)||l.nfBr)).join(', ')||'—')],['NF dev.',r=>esc(uniq(embLinhas(r).map(l=>l.nfDev)).join(', ')||'—')],vcol('Baixa no estoque',r=>valorSai(r))],
  env:[['Requisição',r=>`${esc(r.cod)}<small>${esc(r.titulo||ENV_TIT)}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['NF BR / CLM',r=>esc(r.nfBr||'—')],['Qtd.',r=>r.qtdEnvio===''||r.qtdEnvio==null?'—':fmtN(r.qtdEnvio),'mono'],vcol('Valor',r=>valorSai(r)),['Plataforma',r=>esc(r.plataforma||'—'),'hm'],['Status do envio',r=>stChip(r)]],
- gdv:[['GRD de devolução',r=>`GRD ${esc(r.grd||'—')}<small>${esc(r.cod)} · ${esc(plural((r.itens||[]).length,'item','itens'))}${(r.itens||[]).length?': '+esc(r.itens.map(i=>i.desc).join(', ').slice(0,60)):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—')],['NF BR',r=>esc(uniq((r.itens||[]).map(i=>i.nfBr).filter(Boolean)).join(', ')||'—'),'hm'],['Peso',r=>r.pesoTotal?fmtN(r.pesoTotal)+' kg':'—','mono hm'],vcol('Valor total',r=>+r.valorTotal||0),['Status',r=>stChip(r)]]
+ gdv:[['GRD de devolução',r=>`GRD ${esc(r.grd||'—')}<small>${esc(r.cod)} · ${esc(plural((r.itens||[]).length,'item','itens'))}${(r.itens||[]).length?': '+esc(r.itens.map(i=>i.desc).join(', ').slice(0,60)):''}</small>`,'desc'],['Data',r=>fmtD(r.data),'mono'],['Contrato',r=>esc(r.contrato||'—')],['Motivo / Destino',r=>esc([r.motivo,r.destino?selTxt(r,'destino','destOutro'):''].filter(Boolean).join(' → ')||'—'),'hm'],['NF BR',r=>esc(uniq((r.itens||[]).map(i=>i.nfBr).filter(Boolean)).join(', ')||'—'),'hm'],['Peso',r=>r.pesoTotal?fmtN(r.pesoTotal)+' kg':'—','mono hm'],vcol('Valor total',r=>+r.valorTotal||0),['Status',r=>stChip(r)]]
 };
 function vList(m){
  const M=MOD[m],f=lf(m);const all=regsOf(m);const so=stOpts(m);const L=filtered(m);
@@ -932,7 +939,7 @@ function listaHTML(m){
  const L=filtered(m);const C=COLS[m];
  if(!L.length)return `<div class="card empty"><b>${regsOf(m).length?'Nenhum registro encontrado':'Nenhum registro ainda'}</b>${regsOf(m).length?'Ajuste a busca ou os filtros.':'Toque em “Novo” para cadastrar.'}</div>`;
  return `<div class="muted" style="font-size:12.5px;margin:-4px 0 8px">${L.length} exibido(s)</div><div class="card tw"><table class="tbl rsp"><thead><tr>${C.map(c=>`<th>${c[0]}</th>`).join('')}<th></th></tr></thead><tbody>
- ${L.map(r=>`<tr class="click${inspPend(r)?' insp':''}" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
+ ${L.map(r=>`<tr class="click${inspPend(r)?' insp':''}${r.m==='gdv'&&stGdv(r.status).k==='COLETADO'?' colet':''}" data-act="detail" data-id="${r.id}">${C.map(c=>`<td data-l="${esc(c[0])}" class="${c[2]||''}">${c[1](r)}</td>`).join('')}<td class="hm" style="text-align:right;white-space:nowrap;color:var(--faint)">${r.fotos.length?ic('camera',14)+' '+r.fotos.length:''} ${r.anexos.length?ic('clip',14)+' '+r.anexos.length:''}</td></tr>`).join('')}
  </tbody></table></div>`;
 }
 function renderList(m){const l=$('#lista');if(l)l.innerHTML=listaHTML(m)}
@@ -1018,6 +1025,11 @@ function itensTable(r){const L=r.itens||[];if(!L.length)return '';
 function qrText(r){
  return `${empresa().toUpperCase()} MPT\n${r.cod}\nNF BR: ${r.nfBr||'-'} | RT: ${r.rt||'-'}\nCONTRATO: ${r.contrato||'-'}\nID:${r.id}`;
 }
+
+/* relógio digital do Painel */
+const DSEM=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'],DMES=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+function relogioHTML(){const d=new Date(),z=n=>String(n).padStart(2,'0');return `<div class="t">${z(d.getHours())}<span class="c">:</span>${z(d.getMinutes())}<span class="s">${z(d.getSeconds())}</span></div><div class="d">${DSEM[d.getDay()]} · ${d.getDate()} ${DMES[d.getMonth()]} ${d.getFullYear()}</div>`}
+setInterval(()=>{const e=document.getElementById('relg');if(e)e.innerHTML=relogioHTML()},1000);
 
 /* ================= SELETOR DE ARQUIVOS (global, fora da tela que redesenha) ================= */
 // o próprio campo de arquivo fica por cima do botão: o toque do usuário abre o seletor direto (sem clique programático)
@@ -2451,12 +2463,12 @@ async function gerarGrdExcel(id){
  // bloco de identificação
  const lab={font:{bold:true,size:10,color:{argb:'FFFFFFFF'}},fill:XNAVY,al:{horizontal:'left',indent:1},b:1};
  const val={font:{bold:true,size:11,color:{argb:'FF0F1B2D'}},fill:'FFF3F6FA',al:{horizontal:'left',indent:1},b:1};
- const info=[[['GRD de devolução Nº',r.grd||''],['Área',r.area||'PETROBRAS']],[['Contrato',r.contrato||''],['Setor',r.setor||'MPT']],[['Status',stGdv(r.status).t],['Data',fmtD(r.data)]]];
+ const info=[[['GRD de devolução Nº',r.grd||''],['Área',r.area||'PETROBRAS']],[['Contrato',r.contrato||''],['Setor',r.setor||'MPT']],[['Status',stGdv(r.status).t],['Data',fmtD(r.data)]],[['Motivo',r.motivo||''],['Destino',r.destino?selTxt(r,'destino','destOutro'):'']]];
  info.forEach((p,k)=>{const row=5+k;ws.getRow(row).height=21;
   merge(row,1,row,2);cell(row,1,p[0][0],lab);bandBorder(row,1,2);merge(row,3,row,6);cell(row,3,p[0][1],val);bandBorder(row,3,6);
   cell(row,7,p[1][0],Object.assign({},lab,{al:{horizontal:'right',indent:1}}));merge(row,8,row,NC);cell(row,8,p[1][1],val);bandBorder(row,8,NC)});
  // tabela de itens
- const hr=9;ws.getRow(hr-1).height=8;ws.getRow(hr).height=30;
+ const hr=10;ws.getRow(hr-1).height=8;ws.getRow(hr).height=30;
  ['Item','NF BR','NF Dev','NM','UN','Quantidade','Descrição','Valor total (R$)','Peso (kg)','Reserva','RT'].forEach((h,j)=>cell(hr,j+1,h,{font:{bold:true,size:10,color:{argb:'FFFFFFFF'}},fill:XNAVY,al:{horizontal:'center'},b:1}));
  const L=r.itens||[];let row=hr;
  L.forEach((it,k)=>{row++;const z=k%2?'FFF3F6FA':'FFFFFFFF';const vals=[k+1,it.nfBr||'',it.nfDev||'',it.nm||'',it.un||'',it.qtd===''?'':+it.qtd,it.desc||'',it.vtotal===''?'':+it.vtotal,it.peso===''?'':+it.peso,it.reserva||'',it.rt||''];

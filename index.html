@@ -351,6 +351,14 @@ body{background:linear-gradient(180deg,#e9f0fa 0%,#f1f5f2 100%) fixed}
 .itr .in{padding:8px 10px}.itr .it-t{background:#eef6f1;font-weight:700;color:#0f8a5f}
 .itr.emb{grid-template-columns:28px repeat(4,minmax(0,1fr)) 34px}.itr.emb .emo{grid-column:3/6}.itr.emb .emr2{grid-column:2}.itr.emb .emst{align-self:end;padding-bottom:6px}
 .itr.sd{grid-template-columns:28px repeat(6,minmax(0,1fr)) 34px}.itr.sd .s-o{grid-column:6/8}.itr.sd .it-d{grid-column:2/8}.itr.sd textarea.in{min-height:58px;resize:vertical}
+.rastro{margin-bottom:14px;border-top:3px solid var(--lime)}.rastro h3{display:flex;align-items:center;gap:6px}
+.rst-sum{font-size:13px;color:var(--muted);margin:12px 0 8px;line-height:1.5}.rst-sum b{color:var(--navy)}
+.rst-l{display:flex;flex-direction:column;gap:0;border-left:3px solid #d5deeb;margin-left:6px}
+.rst{display:flex;gap:12px;padding:10px 0 10px 14px;position:relative;cursor:pointer;border-radius:0 10px 10px 0}.rst:hover{background:#f3f6fa}
+.rst::before{content:'';position:absolute;left:-8px;top:15px;width:11px;height:11px;border-radius:50%;background:#0b5cad;border:2px solid #fff;box-shadow:0 0 0 1px #0b5cad}
+.rst-d{font:700 12px/1.4 'SF Mono',Consolas,monospace;color:var(--navy);min-width:78px;padding-top:2px}.rst-b{flex:1;min-width:0}
+.rst-m{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#0b5cad;background:#e8f1fc;padding:2px 7px;border-radius:6px}
+@media (max-width:700px){.rst{flex-direction:column;gap:4px}.rst-d{min-width:0}}
 .tkal{background:#e8f1fc!important;color:#0b4a8f!important;border-color:#b9d3f3!important;border-left-color:#0b5cad!important}
 .itr.gd{grid-template-columns:28px repeat(6,minmax(0,1fr)) 34px}.itr.gd .it-d{grid-column:2/5}
 .ctrg{margin-bottom:14px;border-top:4px solid var(--c);overflow:hidden}.ctrh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 9%,#fff),#fff)}
@@ -754,7 +762,9 @@ function renderView(){
  let h;
  if(MOD[S.view])h=vList(S.view);
  else h=({dash:vDash,form:vForm,rel:vRel,eti:vEti,usuarios:vUsuarios,config:vConfig,tar:vTar,mon:vMon,tform:vTForm,dia:vDia,ctr:vCtr,info:vInfo,evd:vEvd,dsh:vDsh}[S.view]||vDash)();
+ const ae=document.activeElement,aid=ae&&ae.id&&el.contains(ae)?ae.id:null,ss=aid&&ae.selectionStart;
  el.innerHTML=h;
+ if(aid){const n=document.getElementById(aid);if(n){n.focus();try{n.setSelectionRange(ss,ss)}catch(e){}}}
  if(S.view==='form')afterForm();if(S.view==='tform')afterTForm();if(S.view==='evd')evdThumbs();
 }
 
@@ -847,6 +857,7 @@ function vDash(){
     <select class="in" data-chg="dashPl"><option value="">Todas as plataformas</option>${plataformas().map(p=>`<option ${p===F.pl?'selected':''}>${esc(p)}</option>`).join('')}</select>
     <select class="in" data-chg="dashDest"><option value="">Todos os destinos (devolução)</option>${destinos().map(p=>`<option ${p===F.dest?'selected':''}>${esc(p)}</option>`).join('')}</select>
     ${(F.ct||F.pl||F.dest)?`<button class="btn sm" data-act="dashClr">Limpar filtros</button>`:''}</div></div>
+  ${rastroCard()}
   ${tkAlertas()}
   ${isAdmin()?admAlertas():''}
   ${saldoCard()}
@@ -2477,6 +2488,42 @@ function tkAlertas(){if(!S.user||isAdmin())return '';
  const L=myTasks().filter(tkOpen).map(t=>{const p=prazoInfo(t);const atr=p.k==='ATRASO'?-dDiff(today(),t.prazo):0;return {t,atr}}).sort((a,b)=>b.atr-a.atr||(a.t.prazo||'9').localeCompare(b.t.prazo||'9'));
  return L.map(({t,atr})=>`<div class="grdal${atr?'':' tkal'}" style="cursor:pointer" data-act="tkDet" data-id="${t.id}">${ic(atr?'alert':'tar',18)}<div><b>${atr?`Tarefa em atraso há ${plural(atr,'dia','dias')}`:t.status==='AGUARDANDO'?'Nova tarefa':'Tarefa em andamento'}: ${esc(t.titulo)}</b> — ${esc(t.cod)} · prazo ${fmtD(t.prazo)||'sem prazo'}${t.criadoPor&&t.criadoPor!==S.user.nome?' · enviada por '+esc(t.criadoPor):''}. Toque para abrir e atualizar.</div></div>`).join('')}
 
+/* ================= RASTREAR OP / NF / GRD (Painel) ================= */
+const rkN=v=>String(v??'').toUpperCase().replace(/[^0-9A-Z]/g,'').replace(/^0+(?=\d)/,'');
+function rastroChaves(r){const k=[];const add=(t,v)=>{if(v!=null&&String(v).trim())k.push([t,String(v).trim()])};
+ add('OP',r.op);add('GRD',r.grd);add('GRD transf.',r.grdTransf);add('NF BR',r.nfBr);add('NF devolução',r.nfDev);add('NF',r.nf);add('NF venda',r.nfVenda);add('Código',r.cod);add('Pedido',r.pedido);add('RT',r.rt);add('RT/FWO',r.rtFwo);add('Romaneio',r.romaneio);
+ (r.itens||[]).forEach(i=>{add('NF BR',i.nfBr);add('NF devolução',i.nfDev);add('NF',i.nf);add('RT',i.rt);add('RT/FWO',i.rtFwo)});
+ if(r.m==='emb')embLinhas(r).forEach(l=>{add('OP',l.op);add('NF BR',l.nfBr);add('NF devolução',l.nfDev);const lo=l.origem&&getReg(l.origem);if(lo)add('NF BR',lo.nfBr)});
+ const o=r.origem&&getReg(r.origem);if(o){add('NF BR',o.nfBr);add('OP',o.op)}
+ return k}
+function rastroBusca(q){const n=rkN(q);if(n.length<2)return {exato:[],L:[]};
+ const hit=r=>{const ks=rastroChaves(r);const ex=ks.filter(([t,v])=>rkN(v)===n);if(ex.length)return {r,por:ex,ex:1};const par=n.length>=4?ks.filter(([t,v])=>rkN(v).includes(n)):[];return par.length?{r,por:par,ex:0}:null};
+ let L=S.regs.map(hit).filter(Boolean);const exato=L.filter(x=>x.ex);if(exato.length)L=exato;
+ // inclui os lançamentos vinculados (ex.: devolução/envio ligados a um recebimento encontrado)
+ const ids=new Set(L.map(x=>x.r.id));S.regs.forEach(r=>{if(!ids.has(r.id)&&r.origem&&ids.has(r.origem)){L.push({r,por:[['Vinculado a',getReg(r.origem).cod]],ex:1});ids.add(r.id)}});
+ L.sort((a,b)=>(a.r.data||'').localeCompare(b.r.data||'')||(a.r.criadoEm||0)-(b.r.criadoEm||0));
+ const T=(isAdmin()?S.tasks:myTasks()).filter(t=>[t.titulo,t.descricao,t.obs,...(t.upd||[]).map(u=>u.obs)].some(x=>rkN(x).includes(n)));
+ return {L,T,ex:exato.length>0}}
+function rastroRes(){const q=(S.rastro||'').trim();if(!q)return '';const R=rastroBusca(q);
+ if(rkN(q).length<2)return '<div class="muted" style="margin-top:10px">Digite ao menos 2 caracteres.</div>';
+ if(!R.L.length&&!R.T.length)return `<div class="empty" style="margin-top:12px"><b>Nada encontrado para “${esc(q)}”</b>Confira o número da OP, NF ou GRD.</div>`;
+ const porMod={};R.L.forEach(x=>porMod[x.r.m]=(porMod[x.r.m]||0)+1);
+ const ult=R.L.reduce((m,x)=>Math.max(m,...(x.r.hist||[]).map(h=>h.em||0),x.r.atualizadoEm||0,x.r.criadoEm||0),0);
+ const card=({r,por})=>{const M=MOD[r.m],s=stInfo(r),H=(r.hist||[]).slice().reverse();
+  const extra=[r.contrato&&'Contrato '+r.contrato,r.plataforma&&'Plataforma '+r.plataforma,SAID.includes(r.m)&&valorSai(r)?'Baixa '+brl(valorSai(r)):'',ENTR.includes(r.m)&&valorEnt(r)?'Valor '+brl(valorEnt(r)):'',r.m==='gdv'&&r.valorTotal?'Valor '+brl(r.valorTotal):''].filter(Boolean).join(' · ');
+  return `<div class="rst" data-act="detail" data-id="${r.id}"><div class="rst-d">${fmtD(r.data)||'—'}</div><div class="rst-b">
+   <div class="row" style="justify-content:space-between;gap:6px"><div><span class="rst-m">${esc(M.nome)}</span> <b>${esc(r.cod)}</b></div><div class="row" style="gap:4px">${s.t?chip(s.t,s.c):''}${inspPend(r)?chip('Aguardando inspeção','#c42b2b'):''}${aplPend(r)?chip('Aguardando aplicação','#c42b2b'):aplOk(r)?chip('Material aplicado','#0f8a5f'):''}</div></div>
+   <div class="muted" style="font-size:12.5px;margin-top:3px">Encontrado por: ${esc(uniq(por.map(([t,v])=>t+' '+v)).join(', '))}${extra?' · '+esc(extra):''}</div>
+   ${H.length?`<div class="tl" style="margin-top:7px">${H.slice(0,4).map(x=>`<div>${fmtDT(x.em)} · <b>${esc(x.por)}</b> — ${esc(x.txt)}</div>`).join('')}${H.length>4?`<div class="faint">+ ${H.length-4} registro(s) no histórico — toque para ver tudo</div>`:''}</div>`:''}
+  </div></div>`};
+ return `<div class="rst-sum"><b>${plural(R.L.length,'lançamento','lançamentos')}</b> para “${esc(q)}”${R.ex?'':' (busca aproximada)'} · ${Object.entries(porMod).map(([m,n])=>`${esc(MOD[m].nome)} (${n})`).join(' · ')}${ult?` · última movimentação ${fmtDT(ult)}`:''}</div>
+  <div class="rst-l">${R.L.map(card).join('')}</div>
+  ${R.T.length?`<div class="sec">Tarefas relacionadas (${R.T.length})</div><div class="grid g2">${R.T.map(t=>tkCard(t,isAdmin())).join('')}</div>`:''}`}
+function rastroCard(){return `<div class="card pad rastro"><div class="ch" style="margin-bottom:8px"><h3>${ic('search',17)} Rastrear OP, NF ou GRD</h3>${S.rastro?`<button class="btn sm" data-act="rastroClr">Limpar</button>`:''}</div>
+ <form data-form="rastro" class="row" style="gap:8px;flex-wrap:nowrap"><div class="searchw" style="flex:1;margin:0">${ic('search',16)}<input class="in" id="rastroIn" name="q" value="${esc(S.rastro||'')}" placeholder="Digite o nº da OP, NF ou GRD…" autocomplete="off" data-inp="rastroQ" enterkeyhint="search"></div><button class="btn p" type="submit">Buscar</button></form>
+ <div id="rastroRes">${rastroRes()}</div></div>`}
+FORMS.rastro=f=>{S.rastro=f.q.value;const b=$('#rastroRes');if(b)b.innerHTML=rastroRes();f.q.blur()};
+
 /* ================= EXCEL – PADRÃO ACTEMIUM ================= */
 const XNAVY='FF14306B',XLIME='FFB5C900';
 async function saveFile(name,data){
@@ -2771,6 +2818,7 @@ const ACT={...DSH_ACT,...DIA_ACT,...CTR_ACT,...INFO_ACT,...EVD_ACT,
  calDay:b=>{const f=S.view==='mon'?S.mon:S.tk;f.dia=f.dia===b.dataset.d?'':b.dataset.d;f.mes=b.dataset.d.slice(0,7);renderView()},
  calMv:b=>{const f=S.view==='mon'?S.mon:S.tk;const [y,m]=f.mes.split('-').map(Number);const d=new Date(y,m-1+(+b.dataset.n),1);f.mes=isoOf(d).slice(0,7);renderView()},
  calHoje:()=>{const f=S.view==='mon'?S.mon:S.tk;f.mes=today().slice(0,7);f.dia=today();renderView()},logout:()=>logout(),close:()=>closeModal(),novo:()=>novoSheet(),
+ rastroClr:()=>{S.rastro='';renderView()},
  navGrp:b=>navToggle(b.dataset.g),
  more:()=>openModal(`<div class="mh"><div class="row" style="gap:10px"><div class="av">${esc(ini(S.user.nome))}</div><div><b>${esc(S.user.nome)}</b><div class="muted" style="font-size:12px">${isAdmin()?'Administrador':'Usuário'}</div></div></div><button class="btn ghost sm" data-act="close">${ic('x')}</button></div>
   <div class="mb" style="padding-top:4px"><div class="navm">${navGrupos(navItems(),n=>`<button class="lnk" data-act="go" data-v="${n.v}">${ic(n.v)}${n.t}</button>`)}</div><button class="lnk" data-act="scanQR">${ic('qr')}Ler QR code</button><button class="lnk" data-act="myPw">${ic('key')}Alterar minha senha</button><button class="lnk" data-act="logout" style="color:var(--red)">${ic('logout')}Sair</button></div>`,'sheet'),
@@ -2830,6 +2878,7 @@ const CHG={importBk:e=>{const f=e.files&&e.files[0];e.value='';importBackupFile(
  logo:e=>{onLogo(e.files[0]);e.value=''}
 };
 const INP={...CTR_INP,...INFO_INP,...EVD_INP,
+ rastroQ:e=>{S.rastro=e.value;clearTimeout(S._rq);S._rq=setTimeout(()=>{const b=$('#rastroRes');if(b)b.innerHTML=rastroRes()},250)},
  tkq:e=>{S.tk.q=e.value;const L=tkFilter(myTasks(),S.tk);const b=$('#tkList');if(b)b.innerHTML=L.map(t=>tkCard(t)).join('')||'<div class="empty">Nenhuma tarefa.</div>'},
  monq:e=>{S.mon.q=e.value;clearTimeout(S._mq);S._mq=setTimeout(()=>{renderView();const i=$('[data-inp="monq"]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},400)},
  lq:e=>{lf(e.dataset.m).q=e.value;renderList(e.dataset.m)},

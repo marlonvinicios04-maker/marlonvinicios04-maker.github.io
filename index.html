@@ -861,7 +861,7 @@ function vDash(){
   ${tkAlertas()}
   ${isAdmin()?admAlertas():''}
   ${saldoCard()}
-  ${dashTasks()}
+  ${isAdmin()?"":dashTasks()}
   <div class="kpis">
    ${kpi('op','#0b5cad','OPs em verificação',emVer,`${ops.length} OPs cadastradas`,'op')}
    ${kpi('clock','#b7791f','Aguardando conferência do fiscal',cnt('AGUARDANDO FISCAL'),`${pct(cnt('AGUARDANDO FISCAL'),ops.length)}% das OPs`,'op','AGUARDANDO FISCAL')}

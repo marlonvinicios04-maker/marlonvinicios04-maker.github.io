@@ -27,7 +27,11 @@ a{color:var(--pri)}
 .wordmark{font-weight:800;letter-spacing:.06em;color:var(--navy);font-size:17px}
 .brand small{display:block;color:var(--muted);font-size:11.5px;font-weight:500;letter-spacing:0}
 .nav{display:flex;flex-direction:column;gap:2px}
-.nav .grp{font-size:10.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;padding:12px 12px 4px}
+.navm .grp{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;cursor:pointer;font:inherit;font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:left}.navm .grp .chev{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s}.navm .grp.fe .chev{transform:rotate(-90deg)}.navm .grp.ativo span::after{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#b5c900;margin-left:7px;vertical-align:middle}.navm .grpb.fe{display:none}
+.nav .grp{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;border-radius:8px;cursor:pointer;font:inherit;font-size:10.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;padding:10px 12px 6px;margin-top:2px;text-align:left}
+.nav .grp .chev{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s;flex:none}.nav .grp.fe .chev{transform:rotate(-90deg)}.nav .grp.ativo span::after{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#b5c900;margin-left:7px;vertical-align:middle}
+.nav .grpb.fe{display:none}
+.navm .grp{color:#14306b!important;opacity:1!important;font-size:11px;padding:12px 6px 6px;border-top:1px solid var(--line);border-radius:0}.navm .grp:first-child{border-top:0}.navm .grp.ativo{color:#0b5cad!important}
 .nav button{display:flex;align-items:center;gap:11px;border:0;background:none;padding:9px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:500;text-align:left}
 .nav button:hover{background:var(--surface2);color:var(--text)}
 .nav button.on{background:var(--priSoft);color:var(--pri);font-weight:600}
@@ -245,7 +249,7 @@ svg.chart text{font-family:Inter,sans-serif;font-size:11px;fill:var(--muted)}
 body{background:linear-gradient(180deg,#e9f0fa 0%,#f1f5f2 100%) fixed}
 .side{background:linear-gradient(180deg,#0c214d 0%,#14306b 60%,#123f86 100%);border-right:0;color:#fff;box-shadow:4px 0 18px rgba(12,33,77,.18)}
 .side .brand{background:#fff;border-radius:14px;padding:10px 12px;margin:0 2px 8px;box-shadow:0 4px 12px rgba(0,0,0,.15);border-bottom:3px solid var(--lime)}
-.nav .grp{color:#b5c900;opacity:.9}
+.nav .grp{color:#b5c900;opacity:.9}.nav .grp:hover{opacity:1;background:rgba(255,255,255,.06)}.nav .grp.ativo{opacity:1;color:#fff}
 .nav button{color:#c9d6ee}
 .nav button:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav button.on{background:rgba(255,255,255,.14);color:#fff;font-weight:700;box-shadow:inset 3px 0 0 var(--lime)}
@@ -726,9 +730,18 @@ function render(){
  updateChrome();renderView();
 }
 function brandHTML(){const c=cfg();return (c.logo?`<img src="${esc(c.logo)}" alt="">`:`<span class="wordmark">${esc(empresa().toUpperCase())}</span>`)+`<div><small>Controle Geral MPT</small></div>`}
+/* grupos do menu: abrir/fechar */
+function navFech(){if(!S.navF){let L=[];try{L=JSON.parse(localStorage.getItem('navFechados')||'[]')}catch(e){}S.navF=new Set(Array.isArray(L)?L:[])}return S.navF}
+function navGrupos(L,item){const F=navFech();const cur=S.view==='form'&&S.form?S.form.m:S.view==='tform'?'tar':S.view;let h='',g=null,body=[];
+ const flush=()=>{if(g===null){h+=body.join('');return}const on=body.some(x=>x.on),fe=F.has(g);
+  h+=`<button type="button" class="grp${fe?' fe':''}${on&&fe?' ativo':''}" data-act="navGrp" data-g="${esc(g)}" aria-expanded="${!fe}"><span>${esc(g)}</span><svg viewBox="0 0 24 24" class="chev"><path d="m6 9 6 6 6-6"/></svg></button><div class="grpb${fe?' fe':''}">${body.map(x=>x.h).join('')}</div>`};
+ for(const n of L){if(n.g){flush();g=n.g;body=[];continue}body.push({h:item(n),on:n.v===cur})}
+ flush();return h}
+function navToggle(g){const F=navFech();F.has(g)?F.delete(g):F.add(g);try{localStorage.setItem('navFechados',JSON.stringify([...F]))}catch(e){}
+ document.querySelectorAll(`[data-act="navGrp"]`).forEach(b=>{if(b.dataset.g!==g)return;const fe=F.has(g);b.classList.toggle('fe',fe);b.setAttribute('aria-expanded',!fe);const bd=b.nextElementSibling;if(bd)bd.classList.toggle('fe',fe);b.classList.toggle('ativo',fe&&!!(bd&&bd.querySelector('.on')))})}
 function updateChrome(){
  ['#brandSide','#brandTop'].forEach(s=>{const e=$(s);if(e)e.innerHTML=brandHTML()});
- const ns=$('#navSide');if(ns)ns.innerHTML=navItems().map(n=>n.g?`<div class="grp">${n.g}</div>`:`<button data-act="go" data-v="${n.v}">${ic(n.v)}${n.t}${n.n?`<span class="cnt">${regsOf(n.v).length}</span>`:''}${n.dia&&S.diar.some(t=>t.status!=='FEITA')?`<span class="cnt" style="${S.diar.some(diaAtrasada)?'background:#c42b2b;color:#fff;border-color:#c42b2b':'background:var(--lime);color:#14306b;border-color:var(--lime)'}">${S.diar.filter(t=>t.status!=='FEITA').length}</span>`:''}${n.tk&&myTasks().filter(tkOpen).length?`<span class="cnt" style="${myTasks().some(t=>tkOpen(t)&&prazoInfo(t).k==='ATRASO')?'background:#c42b2b;color:#fff;border-color:#c42b2b':'background:var(--lime);color:#14306b;border-color:var(--lime)'}">${myTasks().filter(tkOpen).length}</span>`:''}</button>`).join('');
+ const ns=$('#navSide');if(ns)ns.innerHTML=navGrupos(navItems(),n=>`<button data-act="go" data-v="${n.v}">${ic(n.v)}${n.t}${n.n?`<span class="cnt">${regsOf(n.v).length}</span>`:''}${n.dia&&S.diar.some(t=>t.status!=='FEITA')?`<span class="cnt" style="${S.diar.some(diaAtrasada)?'background:#c42b2b;color:#fff;border-color:#c42b2b':'background:var(--lime);color:#14306b;border-color:var(--lime)'}">${S.diar.filter(t=>t.status!=='FEITA').length}</span>`:''}${n.tk&&myTasks().filter(tkOpen).length?`<span class="cnt" style="${myTasks().some(t=>tkOpen(t)&&prazoInfo(t).k==='ATRASO')?'background:#c42b2b;color:#fff;border-color:#c42b2b':'background:var(--lime);color:#14306b;border-color:var(--lime)'}">${myTasks().filter(tkOpen).length}</span>`:''}</button>`);
  const cur=S.view==='form'&&S.form?S.form.m:S.view==='tform'?'tar':S.view;
  document.querySelectorAll('[data-act="go"]').forEach(b=>b.classList.toggle('on',b.dataset.v===cur));
 }
@@ -2758,8 +2771,9 @@ const ACT={...DSH_ACT,...DIA_ACT,...CTR_ACT,...INFO_ACT,...EVD_ACT,
  calDay:b=>{const f=S.view==='mon'?S.mon:S.tk;f.dia=f.dia===b.dataset.d?'':b.dataset.d;f.mes=b.dataset.d.slice(0,7);renderView()},
  calMv:b=>{const f=S.view==='mon'?S.mon:S.tk;const [y,m]=f.mes.split('-').map(Number);const d=new Date(y,m-1+(+b.dataset.n),1);f.mes=isoOf(d).slice(0,7);renderView()},
  calHoje:()=>{const f=S.view==='mon'?S.mon:S.tk;f.mes=today().slice(0,7);f.dia=today();renderView()},logout:()=>logout(),close:()=>closeModal(),novo:()=>novoSheet(),
+ navGrp:b=>navToggle(b.dataset.g),
  more:()=>openModal(`<div class="mh"><div class="row" style="gap:10px"><div class="av">${esc(ini(S.user.nome))}</div><div><b>${esc(S.user.nome)}</b><div class="muted" style="font-size:12px">${isAdmin()?'Administrador':'Usuário'}</div></div></div><button class="btn ghost sm" data-act="close">${ic('x')}</button></div>
-  <div class="mb" style="padding-top:4px">${navItems().filter(n=>!n.g).map(n=>`<button class="lnk" data-act="go" data-v="${n.v}">${ic(n.v)}${n.t}</button>`).join('')}<button class="lnk" data-act="scanQR">${ic('qr')}Ler QR code</button><button class="lnk" data-act="myPw">${ic('key')}Alterar minha senha</button><button class="lnk" data-act="logout" style="color:var(--red)">${ic('logout')}Sair</button></div>`,'sheet'),
+  <div class="mb" style="padding-top:4px"><div class="navm">${navGrupos(navItems(),n=>`<button class="lnk" data-act="go" data-v="${n.v}">${ic(n.v)}${n.t}</button>`)}</div><button class="lnk" data-act="scanQR">${ic('qr')}Ler QR code</button><button class="lnk" data-act="myPw">${ic('key')}Alterar minha senha</button><button class="lnk" data-act="logout" style="color:var(--red)">${ic('logout')}Sair</button></div>`,'sheet'),
  myPw:()=>pwModal(S.user.id,true),
  new:b=>startForm(b.dataset.m),edit:b=>startForm(getReg(b.dataset.id).m,b.dataset.id),
  cancelForm:async()=>{const F=S.form;if(F&&(F.fotos.some(p=>!p.pid)||F.anexos.some(a=>a.novo))&&!(await confirmBox('Descartar as fotos e anexos ainda não salvos?','Descartar',1)))return;const m=F?F.m:'dash';const id=F&&F.id;S.form=null;go(m);if(id)openDetail(id)},
